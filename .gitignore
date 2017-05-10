@@ -35,3 +35,19 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# Project created directories and files
+.idea
+.sass-cache
+.tscache
+/authConfig
+/models
+/public
+/routes
+/**/.baseDir.ts
+/**/*.d.ts
+/**/.baseDir.js
+server.js
+Gruntfile.js
+package.json
+tsconfig.json
