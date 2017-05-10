@@ -48,6 +48,3 @@ jspm_packages
 /**/*.d.ts
 /**/.baseDir.js
 server.js
-Gruntfile.js
-package.json
-tsconfig.json
