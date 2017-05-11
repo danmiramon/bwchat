@@ -34,7 +34,7 @@ describe("Express REST API Test", function(){
             .end(function(err, res){
                 expect(err).to.eql(null);
                 expect(res.body.length).to.be.above(0);
-                expect(res.body.map(function(item){
+                expect(res.body.map(function(item:any){
                     return item._id;
                 })).to.contain(id);
                 done();

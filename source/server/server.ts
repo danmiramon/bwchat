@@ -32,7 +32,11 @@ let db: mongoose.MongooseThenable = mongoose.connect(dbURL);
 
 //Define middleware
 app.use(logger('dev'));
-app.use(session({secret:'2C44774A-D649-4D44-9535-46E296EF984F'}));
+app.use(session({
+    secret:'2C44774A-D649-4D44-9535-46E296EF984F',
+    resave: false,
+    saveUninitialized: false
+}));
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());

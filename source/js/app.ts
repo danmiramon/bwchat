@@ -1,9 +1,9 @@
 angular.module("chatApp", ["ngRoute"])
-.config(["$routeProvider", function($routeProvider){
+.config(["$routeProvider", function($routeProvider:angular.route.IRouteProvider){
     $routeProvider
         .when('/', {
-            templateUrl: 'views/login.html',
-            controller: 'mainCtrl'
+            templateUrl: 'views/login.html'//,
+            //controller: 'mainCtrl'
         })
         .when('/chat', {
             templateUrl: 'views/chat.html',
@@ -14,49 +14,35 @@ angular.module("chatApp", ["ngRoute"])
         .otherwise({
             redirectTo: '/'
         })
-}])
-.controller("mainCtrl", ["$rootScope", "$scope", "$http", "$location", function($rootScope, $scope, $http, $location){
-    $scope.signup = function(user){
-        $http.post('/signup', user)
-            .then((user)=>{
-                $rootScope.currentUser = user;
-                $location.url('/chat');
-            });
-    };
-
-    $scope.login = function(user){
-        $http.post('/login', user)
-            .then((response) => {
-                $rootScope.currentUser = response;
-                $location.url('/chat');
-            })
-    };
-
-    $scope.logout = function(){
-        $http.post('/logout')
-            .then(()=>{
-                $rootScope.currentUser = null;
-                $location.url('/');
-            })
-    }
 }]);
 
 
-function checkLoggedin($q, $timeout, $http, $location, $rootScope){
+
+//Helper functions
+function checkLoggedin(
+    $q:angular.IQService,
+    $http:angular.IHttpService,
+    $location:angular.ILocationService,
+    $rootScope:angular.IRootScopeService
+    /*chatProfile*/){
+
     let deferred = $q.defer();
 
     $http.get('loggedin').then(
         (user)=>{
+            //chatProfile.errors = null;
             $rootScope.errorMessage = null;
 
             if(user !== '0'){
+                //chatProfile.cookie = user.data;
                 $rootScope.currentUser = user;
                 deferred.resolve();
             }
             else{
-                $rootScope.errorMessage = 'You need to login.';
+                //chatProfile.errors = 'You need to login.';
+                $rootScope.errorMessage = 'You need to log in.';
                 deferred.reject();
-                $location('/');
+                $location.url('/');
             }
         }
     );

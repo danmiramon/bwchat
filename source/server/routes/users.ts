@@ -1,8 +1,9 @@
 //Import the users database
+import * as express from "express";
 import {User} from "../models";
 
 //User signup
-export function signup(req, res, next){
+export function signup(req:express.Request, res:express.Response, next:express.NextFunction){
     User.findOne({email: req.body.email}, function(err, user){
         if(user){
             res.json(null);
@@ -25,18 +26,18 @@ export function signup(req, res, next){
 }
 
 //User login
-export function login(req, res){
+export function login(req:express.Request, res:express.Response){
     res.json(req.user);
 }
 
 //User logout
-export function logout(req, res){
+export function logout(req:express.Request, res:express.Response){
     req.logOut();
-    res.send(200);
+    res.sendStatus(200);
 }
 
 //Logged in verification
-export function loggedin(req, res){
+export function loggedin(req:express.Request, res:express.Response){
     res.send(req.isAuthenticated() ? req.user : '0');
 }
 

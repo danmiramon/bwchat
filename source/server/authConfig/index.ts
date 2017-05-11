@@ -1,10 +1,13 @@
 //Passport configuration
+import * as passport from "passport";
+import * as mongoose from "mongoose";
 import {Strategy as LocalStrategy} from "passport-local";
 import {User} from "../models";
 
-let configPassport = function(passport){
-    passport.serializeUser(function(user, done){
-        done(null, user._id);
+let configPassport = function(passport:passport.Passport){
+
+    passport.serializeUser(function(user:any, done){
+        done(null, user['_id']);
     });
 
     passport.deserializeUser(function(id, done){
@@ -21,7 +24,6 @@ let configPassport = function(passport){
         },
         function(email, password, done){
             User.findOne({email: email.toLowerCase()}, function(err, user){
-                console.log(user);
                 if(err){
                     return done(err);
                 }
