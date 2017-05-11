@@ -1,5 +1,7 @@
 angular.module("chatApp")
-.factory("chatProfile", [function(){
+.factory("chatProfile", ["$q", "$http", "$location", function($q:angular.IQService,
+                                  $http:angular.IHttpService,
+                                  $location:angular.ILocationService){
     let user = {
         error: null,
         cookie: null
@@ -30,6 +32,27 @@ angular.module("chatApp")
 
         getError: function(){
             return user.error;
+        },
+
+        checkLoggedin: function(){
+            let deferred = $q.defer();
+
+            $http.get('loggedin').then(
+                (response)=>{
+                    user.error = null;
+
+                    if(response.data){
+                        deferred.resolve();
+                        $location.url('/chat');
+                    }
+                    else{
+                        user.error = 'You need to login.';
+                        deferred.reject();
+                        $location.url('/');
+                    }
+                }
+            );
+            return deferred.promise;
         }
     };
 }]);

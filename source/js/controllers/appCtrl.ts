@@ -11,42 +11,47 @@ angular.module('chatApp')
     //Sign in scope interface
     $scope.signup = function(user:any){
         $http.post('/signup', user)
-            .then((response)=>{
-                $scope.email = chatProfile.setCookie(response.data).getCookieData("email");
-                //$scope.error = chatProfile.getError();
-                $location.url('/chat');
-            }, null).then((response)=> {
-                console.log(chatProfile.getError());
-                $scope.logged = chatProfile.logged();
-            }, (reason)=>{
-                    //console.log(chatProfile.getError());
-                    console.log('correct catch');
-            }
-            );
+        .then((response)=>{
+            chatProfile.setCookie(response.data);
+            chatProfile.checkLoggedin().then(
+                (responseLogged) => {
+                    $scope.email = chatProfile.getCookieData("email");
+                    $scope.logged = chatProfile.logged();
+                },
+                (reason) => {
+                    $scope.error = chatProfile.getError();
+                }
+            )
+        });
     };
 
     $scope.login = function(user:any){
         $http.post('/login', user)
-            .then((response) => {
-                $scope.email = chatProfile.setCookie(response.data).getCookieData("email");
-                //$scope.error = chatProfile.getError();
-                $location.url('/chat');
-            }).catch((reason)=>{
-                $scope.error = chatProfile.setError('User/Password Incorrect.').getError();
-                console.log($scope.error);
-            }).then((response)=>{
-                $scope.logged = chatProfile.logged();
-            });
+        .then((response) => {
+            chatProfile.setCookie(response.data);
+            chatProfile.checkLoggedin().then(
+                (responseLogged) => {
+                    $scope.email = chatProfile.getCookieData("email");
+                    $scope.logged = chatProfile.logged();
+                },
+                (reason) => {
+                    $scope.error = chatProfile.setError('User/Password Incorrect.').getError();
+                }
+            )
+        },
+        (reason)=>{
+            $scope.error = chatProfile.setError('User/Password Incorrect.').getError();
+        });
     };
 
     $scope.logout = function(){
         $http.post('/logout', null)
-            .then(()=>{
-                $scope.error = null;
-                $scope.email = null;
-                $scope.logged = false;
-                chatProfile.setCookie(null);
-                $location.url('/');
-            })
+        .then(()=>{
+            $scope.error = null;
+            $scope.email = null;
+            $scope.logged = false;
+            chatProfile.setCookie(null);
+            $location.url('/');
+        });
     }
 }]);
