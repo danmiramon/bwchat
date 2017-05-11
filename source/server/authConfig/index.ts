@@ -1,6 +1,5 @@
 //Passport configuration
 import * as passport from "passport";
-import * as mongoose from "mongoose";
 import {Strategy as LocalStrategy} from "passport-local";
 import {User} from "../models";
 
@@ -30,12 +29,10 @@ let configPassport = function(passport:passport.Passport){
 
                 if(!user){
                     return done(null, false);
-                    // return done(null, {_id:1, message: 'Incorrect username.' });
                 }
 
                 if(!user.validPassword(password)){
                     return done(null, false);
-                    // return done(null, {_id:1, message: 'Incorrect password.' });
                 }
 
                 return done(null, user);

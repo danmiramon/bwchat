@@ -1,7 +1,7 @@
 angular.module("chatApp")
 .factory("chatProfile", [function(){
     let user = {
-        errors: null,
+        error: null,
         cookie: null
     };
 
@@ -10,16 +10,26 @@ angular.module("chatApp")
             return user.cookie ? true : false;
         },
 
-        setUser: function(data){
+        setCookie: function(data){
             user.cookie = data;
+            return this;
         },
 
-        getUser: function(){
+        getCookie: function(){
             return user.cookie;
         },
 
-        getUserData: function(field){
-            return user.cookie[field];
+        getCookieData: function(field){
+            return user.cookie ? user.cookie[field] : null;
+        },
+
+        setError: function(message){
+            user.error = message;
+            return this;
+        },
+
+        getError: function(){
+            return user.error;
         }
     };
 }]);

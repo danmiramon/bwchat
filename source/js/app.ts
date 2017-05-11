@@ -23,23 +23,19 @@ function checkLoggedin(
     $q:angular.IQService,
     $http:angular.IHttpService,
     $location:angular.ILocationService,
-    $rootScope:angular.IRootScopeService
-    /*chatProfile*/){
+    chatProfile){
 
     let deferred = $q.defer();
 
     $http.get('loggedin').then(
         (response)=>{
-            //chatProfile.errors = null;
-            $rootScope.errorMessage = null;
+            chatProfile.setError(null);
 
             if(response.data){
-                //chatProfile.cookie = user.data;
                 deferred.resolve();
             }
             else{
-                //chatProfile.errors = 'You need to login.';
-                $rootScope.errorMessage = 'You need to log in.';
+                chatProfile.setError('You need to login.');
                 deferred.reject();
                 $location.url('/');
             }
