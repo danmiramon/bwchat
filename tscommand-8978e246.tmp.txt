@@ -1,0 +1,1 @@
+source\js\app.ts source\js\controllers\appCtrl.ts source\js\services\appServices.ts --declaration --removeComments --target ES5 --module amd --out public/js/app.js

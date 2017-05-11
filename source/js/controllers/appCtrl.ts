@@ -20,7 +20,7 @@ angular.module('chatApp')
         $http.post('/signup', user)
             .then((response)=>{
                 //chatProfile.setUser(response.data);
-                $rootScope.currentUser = response;
+                $rootScope.currentUser = response.data;
                 $location.url('/chat');
             });
     };
@@ -29,8 +29,10 @@ angular.module('chatApp')
         $http.post('/login', user)
             .then((response) => {
                 //chatProfile.setUser(response.data);
-                $rootScope.currentUser = user;
+                $rootScope.currentUser = response.data;
                 $location.url('/chat');
+            }, (reason)=>{
+                $rootScope.errorMessage = 'User/Password Incorrect.';
             })
     };
 

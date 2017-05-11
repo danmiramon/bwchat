@@ -3,7 +3,6 @@ import * as bcrypt from "bcrypt-nodejs";
 
 //User interface
 export interface IUser extends mongoose.Document{
-    _id:mongoose.Schema.Types.ObjectId;
     username:string;
     password:string;
     firstname:string;
@@ -32,7 +31,6 @@ let chat: mongoose.Schema = new mongoose.Schema({
 
 //Schemas
 let userSchema: mongoose.Schema = new mongoose.Schema({
-    _id:mongoose.Schema.Types.ObjectId,
     username:String,
     password:String,
     firstname: {type: String},

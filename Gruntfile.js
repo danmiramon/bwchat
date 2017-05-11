@@ -99,9 +99,19 @@ module.exports = function(grunt){
 
         //WATCHERS
         watch:{
-            typescript:{
-                files: 'source/**/*.ts',
-                tasks: 'ts'
+            typescriptClient:{
+                files: 'source/js/**/*.ts',
+                tasks: 'ts:client'
+            },
+
+            typescriptServer:{
+                files: 'source/server/**/*.ts',
+                tasks: 'ts:server'
+            },
+
+            typescriptTest:{
+                files: 'source/tests/**/*.ts',
+                tasks: 'ts:test'
             },
 
             sass:{

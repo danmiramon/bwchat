@@ -29,13 +29,12 @@ function checkLoggedin(
     let deferred = $q.defer();
 
     $http.get('loggedin').then(
-        (user)=>{
+        (response)=>{
             //chatProfile.errors = null;
             $rootScope.errorMessage = null;
 
-            if(user !== '0'){
+            if(response.data){
                 //chatProfile.cookie = user.data;
-                $rootScope.currentUser = user;
                 deferred.resolve();
             }
             else{

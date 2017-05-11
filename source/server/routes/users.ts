@@ -38,6 +38,6 @@ export function logout(req:express.Request, res:express.Response){
 
 //Logged in verification
 export function loggedin(req:express.Request, res:express.Response){
-    res.send(req.isAuthenticated() ? req.user : '0');
+    res.send(req.isAuthenticated());
 }
 
