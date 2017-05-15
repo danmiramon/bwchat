@@ -8,8 +8,10 @@ angular.module("chatApp")
     };
 
     return {
+        //Checks if the user is logged, by checking the cookie object
         logged: function(){
-            return user.cookie ? true : false;
+            // return user.cookie ? true : false;
+            return !!user.cookie;
         },
 
         setCookie: function(data){
@@ -37,7 +39,7 @@ angular.module("chatApp")
         checkLoggedin: function(){
             let deferred = $q.defer();
 
-            $http.get('loggedin').then(
+            $http.get('/loggedin').then(
                 (response)=>{
                     user.error = null;
 
@@ -55,4 +57,26 @@ angular.module("chatApp")
             return deferred.promise;
         }
     };
-}]);
+}])
+
+.factory("sio", function(){
+    let socket:SocketIOClient.Socket;
+
+    return {
+        connect: function(){
+            socket = io.connect('http://localhost:3000');
+        },
+
+        on: function(event:string, callback:Function){
+            socket.on(event, callback);
+        },
+
+        emit: function(input:string){
+            socket.emit('messages', {message: input});
+        },
+
+        close: function(){
+            socket.close();
+        }
+    }
+});

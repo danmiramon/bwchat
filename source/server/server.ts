@@ -10,6 +10,8 @@ import * as passport from "passport";
 import {configPassport} from "./authConfig";
 import * as session from "express-session";
 import * as routes from "./routes";
+import * as http from "http";
+import * as socketio from "socket.io";
 //import * as models from "./models";
 
 
@@ -19,6 +21,10 @@ let app:express.Express = express();
 app.set('appName', 'Black & White Chat');
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
+
+    //Create an http socketed server
+let server = http.createServer(app);
+let io = socketio.listen(server);
 
 configPassport(passport);
 
@@ -48,16 +54,20 @@ app.use(serveStatic(path.join(__dirname, 'public')));
 
 
 //Routes
+    //Login Routes
 app.post('/login', passport.authenticate('local-login'), routes.User.login);
 app.post('/logout', routes.User.logout);
 app.post('/signup', routes.User.signup);
 app.get('/loggedin', routes.User.loggedin);
 
+    //Main Socket Routes
+io.on('connection', routes.Socket.connection);
+
 
 
 
 //Run the server
-app.listen(app.get('port'), function(){
+server.listen(app.get('port'), function(){
     console.log('Listening at port ' + app.get('port') + '...');
 });
 

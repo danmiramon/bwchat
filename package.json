@@ -29,6 +29,8 @@
     "@types/passport": "^0.3.3",
     "@types/passport-local": "^1.0.30",
     "@types/serve-static": "^1.7.31",
+    "@types/socket.io": "^1.4.29",
+    "@types/socket.io-client": "^1.4.29",
     "angular": "^1.6.4",
     "angular-route": "^1.6.4",
     "bcrypt-nodejs": "0.0.3",
@@ -40,7 +42,8 @@
     "morgan": "^1.8.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
-    "serve-static": "^1.12.2"
+    "serve-static": "^1.12.2",
+    "socket.io": "^2.0.1"
   },
   "devDependencies": {
     "@types/expect.js": "^0.3.29",
@@ -60,6 +63,7 @@
     "grunt-ts": "^6.0.0-beta.15",
     "mocha": "^3.3.0",
     "superagent": "^3.5.2",
-    "typescript": "^2.3.2"
+    "typescript": "^2.3.2",
+    "typings": "^2.1.1"
   }
 }

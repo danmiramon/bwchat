@@ -1,4 +1,21 @@
 <div>
-    <h1>A Chat</h1>
-    <h3>{{email}}</h3>
+    <nav>
+        <div>Menu buttons
+            <div>Profile Picture</div>
+            <div>
+                <div >
+                    <button ng-repeat="item in menu" ng-click="selectMenu(item)">{{item}}</button>
+                </div>
+            </div>
+        </div>
+
+        <ng-include src="'views/menu/profile.html'" ng-show="selectedMenu == 'Profile'"></ng-include>
+        <ng-include src="'views/menu/contacts.html'" ng-show="selectedMenu == 'Contacts'"></ng-include>
+        <ng-include src="'views/menu/chats.html'" ng-show="selectedMenu == 'Chats'"></ng-include>
+    </nav>
+
+    <main>
+        <div>Conversation area</div>
+        <div>Input area</div>
+    </main>
 </div>
