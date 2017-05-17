@@ -1,20 +1,21 @@
-<div>
-    <nav>
-        <div>Menu buttons
-            <div>Profile Picture</div>
-            <div>
-                <div >
-                    <button ng-repeat="item in menu" ng-click="selectMenu(item)">{{item}}</button>
-                </div>
-            </div>
-        </div>
-
-        <ng-include src="'views/menu/profile.html'" ng-show="selectedMenu == 'Profile'"></ng-include>
-        <ng-include src="'views/menu/contacts.html'" ng-show="selectedMenu == 'Contacts'"></ng-include>
-        <ng-include src="'views/menu/chats.html'" ng-show="selectedMenu == 'Chats'"></ng-include>
+<div layout="row">
+    <nav flex="30">
+        <md-content class="md-padding">
+            <md-tabs md-dynamic-height>
+                <md-tab ng-repeat="menu in menus" md-on-select="dataLoad(menu.tooltip)">
+                    <md-tab-label>
+                        <md-tooltip md-direction="top" md-autohide="true">{{menu.tooltip}}</md-tooltip>
+                        <md-icon class="material-icons md-36">{{menu.label}}</md-icon>
+                    </md-tab-label>
+                    <md-tab-body>
+                        <ng-include src="menu.address"></ng-include>
+                    </md-tab-body>
+                </md-tab>
+            </md-tabs>
+        </md-content>
     </nav>
 
-    <main>
+    <main flex="70">
         <div>Conversation area</div>
         <div>Input area</div>
     </main>

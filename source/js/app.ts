@@ -1,4 +1,4 @@
-angular.module("chatApp", ["ngRoute"])
+angular.module("chatApp", ["ngRoute", "ngMaterial"])
 .config(["$routeProvider", function($routeProvider:angular.route.IRouteProvider){
 
 
@@ -6,8 +6,8 @@ angular.module("chatApp", ["ngRoute"])
         .when('/', {
             templateUrl: 'views/login.html',
             resolve: {
-                logged: function(chatProfile, $location){
-                    if(chatProfile.logged()){
+                logged: function(sio, $location){
+                    if(sio.logged){
                         $location.url('/chat');
                     }
                 }
@@ -16,8 +16,8 @@ angular.module("chatApp", ["ngRoute"])
         .when('/chat', {
             templateUrl: 'views/chat.html',
             resolve: {
-                logged: function(chatProfile, $location){
-                        if(!chatProfile.logged()){
+                logged: function(sio, $location){
+                    if(!sio.logged){
                             $location.url('/');
                     }
                 }

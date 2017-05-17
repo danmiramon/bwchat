@@ -1,3 +1,40 @@
-*{
+/**{
   border: 1px solid black;
+}*/
+
+body{
+  width: 960px;
+  margin: 0 auto;
+
+  h1{
+    text-align: center;
+  }
+}
+
+.profilePic{
+   width: 64px;
+   height: 64px;
+   background-repeat: no-repeat no-repeat;
+   pointer-events: none;
+   cursor: pointer;
+ }
+
+.pictureList{
+  width: 64px;
+  height: 64px;
+  background-repeat: no-repeat no-repeat;
+  cursor: pointer;
+  border: 1px solid black;
+}
+
+.customError{
+  opacity: 1;
+  margin-top: 5px;
+  color: rgb(221,44,0);
+  font-size: 12px;
+  line-height: 14px;
+}
+
+.md-36{
+  font-size:36px;
 }

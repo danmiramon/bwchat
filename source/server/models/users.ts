@@ -40,7 +40,10 @@ let userSchema: mongoose.Schema = new mongoose.Schema({
         type: String,
         default: 'en'
     },
-    profilePicture: {type: String},
+    profilePicture: {
+        type: String,
+        default: 'img/profilePictures/bk.png'
+    },
     contacts:{type: [contact]},
     chats:{type: [chat]}
 });

@@ -1,18 +1,60 @@
-<div>
-    <div>
-        <div>
-            <div>
-                <label for="email">Email:</label>
-                <input type="text" id="email" name="email" ng-model="user.email">
-            </div>
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" ng-model="user.password">
-            </div>
-            <div>
-                <button ng-click="login(user)">Login</button>
-                <button ng-click="signup(user)">Signup</button>
-            </div>
-        </div>
-    </div>
+<div layout="row" layout-align="center center">
+    <md-content class="md-padding">
+        <md-tabs md-dynamic-height>
+            <!-- LOGIN FORM -->
+            <md-tab label="Login">
+                <div class="customError" ng-show="error">{{error}}</div>
+                <md-content class="md-padding">
+                    <md-input-container class="md-block">
+                        <label>Email</label>
+                        <input type="text" name="email" ng-model="user.email" required>
+                        <div ng-messages="email.$error">
+                            <div ng-message="required">Email is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container class="md-block">
+                        <label>Password</label>
+                        <input type="password" name="password" ng-model="user.password" required>
+                        <div ng-messages="password.$error">
+                            <div ng-message="required">Password is required.</div>
+                        </div>
+                    </md-input-container>
+                </md-content>
+                <div layout="row" layout-align="center center">
+                    <md-button ng-click="login(user)" class="md-raised md-primary">Submit</md-button>
+                </div>
+            </md-tab>
+
+            <!-- SIGNUP FORM -->
+            <md-tab label="Signup">
+                <div class="customError" ng-show="error">{{error}}</div>
+                <md-content class="md-padding">
+                    <md-input-container class="md-block">
+                        <label>Email</label>
+                        <input type="text" name="email" ng-model="user.email" required>
+                        <div ng-messages="email.$error">
+                            <div ng-message="required">Email is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container class="md-block">
+                        <label>Password</label>
+                        <input type="password" name="password" ng-model="user.password" required>
+                        <div ng-messages="password.$error">
+                            <div ng-message="required">Password is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container class="md-block">
+                        <label>Re-Type Password</label>
+                        <input type="password" name="password2" ng-model="user.password2" required>
+                        <div ng-messages="password2.$error">
+                            <div ng-message="required">Second password is required.</div>
+                        </div>
+                    </md-input-container>
+                </md-content>
+                <div layout="row" layout-align="center center">
+                    <md-button ng-click="signup(user)" class="md-raised md-primary">Submit</md-button>
+                </div>
+            </md-tab>
+        </md-tabs>
+    </md-content>
 </div>

@@ -2,6 +2,7 @@
 import * as express from "express";
 import {User} from "../models";
 
+//LOGIN MANAGEMENT
 //User signup
 export function signup(req:express.Request, res:express.Response, next:express.NextFunction){
     User.findOne({email: req.body.email}, function(err, user){
@@ -11,6 +12,7 @@ export function signup(req:express.Request, res:express.Response, next:express.N
         }
         else{
             let newUser = new User();
+            newUser.username = req.body.username;
             newUser.email = req.body.email.toLowerCase();
             newUser.password = newUser.generateHash(req.body.password);
             newUser.save(function(err, user){
@@ -39,5 +41,17 @@ export function logout(req:express.Request, res:express.Response){
 //Logged in verification
 export function loggedin(req:express.Request, res:express.Response){
     res.send(req.isAuthenticated());
+}
+
+
+//SOCKET IO REQUESTS
+export function getUser(userId:string){
+    //let foundUser;
+    User.findOne({_id: userId}, function(err, user){
+        if(err) { throw err; }
+        return user.toJSON();
+    });/*.then(
+        (response) => { return response;}
+    )*/
 }
 

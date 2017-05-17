@@ -1,81 +1,31 @@
 angular.module("chatApp")
-.factory("chatProfile", ["$q", "$http", "$location", function($q:angular.IQService,
-                                  $http:angular.IHttpService,
-                                  $location:angular.ILocationService){
-    let user = {
-        error: null,
-        cookie: null
-    };
-
-    return {
-        //Checks if the user is logged, by checking the cookie object
-        logged: function(){
-            // return user.cookie ? true : false;
-            return !!user.cookie;
-        },
-
-        setCookie: function(data){
-            user.cookie = data;
-            return this;
-        },
-
-        getCookie: function(){
-            return user.cookie;
-        },
-
-        getCookieData: function(field){
-            return user.cookie ? user.cookie[field] : null;
-        },
-
-        setError: function(message){
-            user.error = message;
-            return this;
-        },
-
-        getError: function(){
-            return user.error;
-        },
-
-        checkLoggedin: function(){
-            let deferred = $q.defer();
-
-            $http.get('/loggedin').then(
-                (response)=>{
-                    user.error = null;
-
-                    if(response.data){
-                        deferred.resolve();
-                        $location.url('/chat');
-                    }
-                    else{
-                        user.error = 'You need to login.';
-                        deferred.reject();
-                        $location.url('/');
-                    }
-                }
-            );
-            return deferred.promise;
-        }
-    };
-}])
-
 .factory("sio", function(){
     let socket:SocketIOClient.Socket;
 
     return {
-        connect: function(){
+        logged: null,
+
+        connect: function(userId:string){
             socket = io.connect('http://localhost:3000');
+            this.logged = userId;
         },
 
         on: function(event:string, callback:Function){
             socket.on(event, callback);
         },
 
-        emit: function(input:string){
-            socket.emit('messages', {message: input});
+        //Send at most two parameters to the server: array of arguments and an aknowlegment function
+        emit: function(event:string, ...args:any[]){
+            if(typeof args[args.length-1] === 'function'){
+                socket.emit(event, args.slice(0, args.length-1), args[args.length-1]);
+            }
+            else{
+                socket.emit(event, args);
+            }
         },
 
         close: function(){
+            this.logged = null;
             socket.close();
         }
     }
