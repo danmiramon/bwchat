@@ -60,6 +60,10 @@ app.post('/logout', routes.User.logout);
 app.post('/signup', routes.User.signup);
 app.get('/loggedin', routes.User.loggedin);
 
+    //Data query routes
+app.get('/userData', routes.User.getData);
+app.put('/updateUserData', routes.User.updateData);
+
     //Main Socket Routes
 io.on('connection', routes.Socket.connection);
 

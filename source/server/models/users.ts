@@ -33,8 +33,14 @@ let chat: mongoose.Schema = new mongoose.Schema({
 let userSchema: mongoose.Schema = new mongoose.Schema({
     username:String,
     password:String,
-    firstname: {type: String},
-    lastname: {type: String},
+    firstname: {
+        type: String,
+        default: ""
+    },
+    lastname: {
+        type: String,
+        default: ""
+    },
     email: {type: String},
     language: {
         type: String,

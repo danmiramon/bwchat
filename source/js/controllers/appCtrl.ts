@@ -1,43 +1,21 @@
 angular.module('chatApp')
-.controller("mainCtrl", ["$scope", "$http", "$location", "$q", "sio", function(
+.controller("mainCtrl", ["$scope", "$http", "$location", "$q", "RESTapi"/*, "sio"*/, function(
     $scope:angular.IScope,
     $http:angular.IHttpService,
     $location:angular.ILocationService,
     $q:angular.IQService,
-    sio
+    RESTapi//,
+    //sio
 ){
+    //Connect to the socket
+    RESTapi.ioConnect();
+
     //GLOBAL VARIABLES
     $scope.error = null;
     $scope.logged = null;
-    // $scope.display = {
-    //     user:"",
-    //     picture:""
-    // };
+
 
     //LOGIN - SIGNUP
-    //Helper functions
-    let checkLoggedin = function(userId){
-        let deferred = $q.defer();
-
-        $http.get('/loggedin').then(
-            (response)=>{
-                $scope.error = null;
-
-                if(response.data){
-                    deferred.resolve();
-                    sio.connect(userId);
-                    $scope.logged = sio.logged;
-                    $location.url('/chat');
-                }
-                else{
-                    deferred.reject();
-                    $location.url('/');
-                }
-            }
-        );
-        return deferred.promise;
-    };
-
     //Sign up
     $scope.signup = function(user:any){
         if(!user || !user.email){
@@ -56,43 +34,29 @@ angular.module('chatApp')
         }
 
         user.username = user.email.slice(0, user.email.indexOf('@'));
-        $http.post('/signup', user)
-        .then((response)=>{
-            checkLoggedin(response.data['_id']).then(
-                (responseLogged) => {},
-                (reason) => {
-                    $scope.error = 'User already exists. Please log in.'
-                }
-            )
-        });
+
+        RESTapi.signup(user);
+        $scope.error = RESTapi.getError();
     };
 
+    //Log in
     $scope.login = function(user:any){
-        $http.post('/login', user)
-        .then((response) => {
-                checkLoggedin(response.data['_id']).then(
-                    (responseLogged) => {},
-                    (reason) => {
-                        $scope.error = 'User/Password Incorrect.';
-                    }
-                )
-            },
-            (reason)=>{
-                $scope.error = 'User/Password Incorrect.';
-            }
-        );
+        RESTapi.login(user);
+        $scope.error = RESTapi.getError();
     };
 
     //Logout
     $scope.logout = function(){
-        $http.post('/logout', null)
-            .then(()=>{
-                $scope.error = null;
-                sio.close();
-                $scope.logged = sio.logged;
-                $location.url('/');
-            });
+        RESTapi.logout();
+        $scope.logged = null;
+        $scope.error = null;
     };
+
+    //Socket calls
+        //On connection, initialize the user
+    RESTapi.ioOn('logged', function(){
+        $scope.logged = RESTapi.getUser();
+    });
 
 
 
@@ -117,12 +81,19 @@ angular.module('chatApp')
     ];
 
     //Menu data loading
+        //Get request config object
+    let config = {
+        params: null
+    };
         //Helper functions
     let profileLoad = function(){
-        console.log("I am in Profile");
-        sio.emit('getUserData', $scope.logged, 'firstname', 'lastname', 'username', 'language', function(data){
-            console.dir(data);
-        });
+        config.params = {fields: 'firstname lastname username language profilePicture'};
+        RESTapi.userData(config)
+        .then(
+            (response => {
+                $scope.profile = response.data;
+            })
+        );
     };
 
     let contactsLoad = function(){
@@ -149,9 +120,17 @@ angular.module('chatApp')
             }
         }
     };
-    // $scope.selectMenu = function(item){
-    //     $scope.selectedMenu = item;
-    // };
+
+    $scope.profileUpdate = function(){
+        RESTapi.updateUserData($scope.profile)
+        .then(
+            (response) => {},
+            (reason) => {
+                console.log('Error ' + reason);
+            }
+        );
+    };
+
 
     //Profile Pictures
     $scope.showPics = false;
@@ -169,12 +148,9 @@ angular.module('chatApp')
         'img/profilePictures/wp.png'];
 
     $scope.selectPic = function(pic){
-        $scope.user.profilePicture = pic.img;
+        $scope.profile.profilePicture = pic.img;
     };
-    $scope.profileChange = {
-        language: 'en'
-    };
-    $scope.print = function(){
-        console.dir($scope.user);
-    }
+    // $scope.profileChange = {
+    //     language: 'en'
+    // };
 }]);

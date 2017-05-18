@@ -1,7 +1,7 @@
 <md-content layout="column" layout-wrap>
     <md-button class="md-raised md-block" ng-click="showPics = !showPics" aria-label="Profile Pictures">
         <md-tooltip md-direction="right" md-autohide="true">Select a Profile Picture</md-tooltip>
-        <img class="profilePic" ng-src="{{display.picture}}">
+        <img class="profilePic" ng-src="{{profile.profilePicture}}">
     </md-button>
 
     <div layout="row" layout-align="center center" layout-wrap ng-show="showPics">
@@ -13,26 +13,26 @@
 
     <md-input-container class="md-block">
         <label>First Name</label>
-        <input type="text" name="firstname" ng-model="user.firstname">
+        <input type="text" name="firstname" ng-model="profile.firstname">
     </md-input-container>
 
     <md-input-container class="md-block">
         <label>Last Name</label>
-        <input type="text" name="lastname" ng-model="user.lastname">
+        <input type="text" name="lastname" ng-model="profile.lastname">
     </md-input-container>
 
     <md-input-container class="md-block">
         <label>Username</label>
-        <input type="text" name="username" ng-model="user.username">
+        <input type="text" name="username" ng-model="profile.username">
     </md-input-container>
 
     <md-input-container class="md-block">
         <label>Language</label>
-        <md-select ng-model="profileChange.language" placeholder="user.language">
+        <md-select ng-model="profile.language" placeholder="profile.language">
             <md-option value="en">English</md-option>
-            <md-option value="es">Spanish</md-option>
+            <md-option value="es">Español</md-option>
         </md-select>
     </md-input-container>
 
-    <md-button ng-click="print()" class="md-raised md-primary">Apply</md-button>
+    <md-button ng-click="profileUpdate()" class="md-raised md-primary">Apply</md-button>
 </md-content>

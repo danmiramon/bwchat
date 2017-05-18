@@ -6,20 +6,16 @@ angular.module("chatApp", ["ngRoute", "ngMaterial"])
         .when('/', {
             templateUrl: 'views/login.html',
             resolve: {
-                logged: function(sio, $location){
-                    if(sio.logged){
-                        $location.url('/chat');
-                    }
+                logged: function(RESTapi) {
+                    RESTapi.checkLoggedIn('/');
                 }
             }
         })
         .when('/chat', {
             templateUrl: 'views/chat.html',
             resolve: {
-                logged: function(sio, $location){
-                    if(!sio.logged){
-                            $location.url('/');
-                    }
+                logged: function(RESTapi) {
+                    RESTapi.checkLoggedIn('/chat');
                 }
             }
         })

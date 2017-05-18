@@ -40,18 +40,27 @@ export function logout(req:express.Request, res:express.Response){
 
 //Logged in verification
 export function loggedin(req:express.Request, res:express.Response){
-    res.send(req.isAuthenticated());
+    res.send(req.isAuthenticated() ? req.user : '0');
 }
 
 
-//SOCKET IO REQUESTS
-export function getUser(userId:string){
-    //let foundUser;
-    User.findOne({_id: userId}, function(err, user){
-        if(err) { throw err; }
-        return user.toJSON();
-    });/*.then(
-        (response) => { return response;}
-    )*/
+//QUERIES
+export function getData(req:express.Request, res:express.Response){
+    //User.findOne({_id: req.query.id}, req.query.fields, function(err, user){
+    User.findById(req.user._id, req.query.fields, function(err, user){
+        if(err){
+            throw(err);
+        }
+
+        res.json(user);
+    });
+}
+
+export function updateData(req:express.Request, res:express.Response){
+    User.findByIdAndUpdate(req.user._id, req.body, function(err, user){
+        if(err){
+            throw(err);
+        }
+    });
 }
 
