@@ -1,5 +1,6 @@
 //Import the users database
 import * as express from "express";
+import * as mongoose from "mongoose";
 import {User} from "../models";
 
 //LOGIN MANAGEMENT
@@ -46,8 +47,7 @@ export function loggedin(req:express.Request, res:express.Response){
 
 //QUERIES
 export function getData(req:express.Request, res:express.Response){
-    //User.findOne({_id: req.query.id}, req.query.fields, function(err, user){
-    User.findById(req.user._id, req.query.fields, function(err, user){
+    User.findOne(JSON.parse(req.query.searchBy), req.query.fields, function(err, user){
         if(err){
             throw(err);
         }
@@ -62,5 +62,45 @@ export function updateData(req:express.Request, res:express.Response){
             throw(err);
         }
     });
+}
+
+export function insertUpdateContact(req:express.Request, res:express.Response){
+    //Search if we have the contact in the contact list, if we do, update it, else, insert it
+    User.findOneAndUpdate({'_id':req.body.id, 'contacts.contactId':req.body.contact.contactId},
+        {$set: {'contacts.$': req.body.contact}},
+        //{new:true},
+        function(err, contact){
+            if(err){
+                throw(err);
+            }
+
+            //In case the contact is not found in the user's list, insert it
+            if(!contact){
+                User.findOneAndUpdate({'_id':req.body.id},
+                    {$push: {contacts: req.body.contact}},
+                    {upsert:true, new:true},
+                    function(err,inserted){
+                        if(err){
+                            throw(err);
+                        }
+                    }
+                )
+            }
+
+            res.json(contact);
+        });
+}
+
+export function deleteUserContact(req:express.Request, res:express.Response){
+    User.findByIdAndUpdate(req.query.userId,
+        {$pull:{contacts:{contactId:{$in:req.query.contacts}}}},
+        function(err, user){
+            if(err){
+                throw(err);
+            }
+
+            res.json(user);
+        }
+    );
 }
 

@@ -62,10 +62,13 @@ app.get('/loggedin', routes.User.loggedin);
 
     //Data query routes
 app.get('/userData', routes.User.getData);
-app.put('/updateUserData', routes.User.updateData);
+app.post('/updateUserData', routes.User.updateData);
+app.post('/insertUpdateContact', routes.User.insertUpdateContact);
+app.delete('/deleteUserContact', routes.User.deleteUserContact);
 
     //Main Socket Routes
-io.on('connection', routes.Socket.connection);
+routes.Socket.setIO(io);
+//io.on('connection', routes.Socket.connection);
 
 
 

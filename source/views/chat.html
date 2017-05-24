@@ -1,5 +1,5 @@
 <div layout="row">
-    <nav flex="30">
+    <nav flex="30" ng-controller="menuCtrl">
         <md-content class="md-padding">
             <md-tabs md-dynamic-height>
                 <md-tab ng-repeat="menu in menus" md-on-select="dataLoad(menu.tooltip)">

@@ -1,11 +1,10 @@
 angular.module('chatApp')
-.controller("mainCtrl", ["$scope", "$http", "$location", "$q", "RESTapi"/*, "sio"*/, function(
+.controller("mainCtrl", ["$scope", "$http", "$location", "$q", "RESTapi", function(
     $scope:angular.IScope,
     $http:angular.IHttpService,
     $location:angular.ILocationService,
     $q:angular.IQService,
-    RESTapi//,
-    //sio
+    RESTapi
 ){
     //Connect to the socket
     RESTapi.ioConnect();
@@ -35,14 +34,24 @@ angular.module('chatApp')
 
         user.username = user.email.slice(0, user.email.indexOf('@'));
 
-        RESTapi.signup(user);
-        $scope.error = RESTapi.getError();
+        RESTapi.signup(user)
+        .then((response) => {
+                setData();
+        },
+            (reason) => {
+                setData();
+        });
     };
 
     //Log in
     $scope.login = function(user:any){
-        RESTapi.login(user);
-        $scope.error = RESTapi.getError();
+        RESTapi.login(user)
+        .then((response) => {
+            setData();
+        },
+            (reason) => {
+            setData();
+        });
     };
 
     //Logout
@@ -52,14 +61,24 @@ angular.module('chatApp')
         $scope.error = null;
     };
 
-    //Socket calls
-        //On connection, initialize the user
-    RESTapi.ioOn('logged', function(){
+    let setData = function(){
+        $scope.error = RESTapi.getError();
         $scope.logged = RESTapi.getUser();
-    });
+    };
+}])
 
-
-
+.controller("menuCtrl", ["$scope", "$http", "$timeout", "orderByFilter", "$location", "$q", "$mdDialog", "$mdMenu", "RESTapi", "EMAIL_RE", function(
+    $scope:angular.IScope,
+    $http:angular.IHttpService,
+    $timeout:angular.ITimeoutService,
+    orderBy:angular.IFilterOrderBy,
+    $location:angular.ILocationService,
+    $q:angular.IQService,
+    $mdDialog,
+    $mdMenu,
+    RESTapi,
+    EMAIL_RE
+){
     //MENUS
     //Menu tabs configuration
     $scope.menus = [
@@ -70,7 +89,7 @@ angular.module('chatApp')
         },
         {
             tooltip: 'Contacts',
-            label: 'contacts',
+            label: 'people',
             address: 'views/menu/contacts.html'
         },
         {
@@ -80,14 +99,23 @@ angular.module('chatApp')
         }
     ];
 
+    //Sorting elements. Receives a collection name and a field
+    $scope.sortBy = function(collection, field){
+        $scope[collection] = orderBy($scope[collection], field);
+        $scope.remove = false;
+    };
+
     //Menu data loading
-        //Get request config object
+    //Get request config object
     let config = {
         params: null
     };
-        //Helper functions
+    //Helper functions
     let profileLoad = function(){
-        config.params = {fields: 'firstname lastname username language profilePicture'};
+        config.params = {
+            searchBy: { _id: RESTapi.getUser() },
+            fields: 'firstname lastname username language profilePicture'
+        };
         RESTapi.userData(config)
         .then(
             (response => {
@@ -97,8 +125,24 @@ angular.module('chatApp')
     };
 
     let contactsLoad = function(){
-        console.log("I am in Contacts");
+        config.params = {
+            searchBy: { _id: RESTapi.getUser() },
+            fields: 'contacts'
+        };
+        RESTapi.userData(config)
+        .then(
+            (response => {
+                $scope.contacts = response.data.contacts;
+                $scope.selectedContact = [];
+                $scope.sortBy('contacts', 'viewname');
+            })
+        );
     };
+
+    //Reload the contacts list
+    RESTapi.ioOn('load contacts', function(){
+        contactsLoad();
+    });
 
     let chatsLoad = function(){
         console.log("I am in Chats");
@@ -123,12 +167,12 @@ angular.module('chatApp')
 
     $scope.profileUpdate = function(){
         RESTapi.updateUserData($scope.profile)
-        .then(
-            (response) => {},
-            (reason) => {
-                console.log('Error ' + reason);
-            }
-        );
+            .then(
+                (response) => {},
+                (reason) => {
+                    console.log('Error ' + reason);
+                }
+            );
     };
 
 
@@ -150,7 +194,398 @@ angular.module('chatApp')
     $scope.selectPic = function(pic){
         $scope.profile.profilePicture = pic.img;
     };
-    // $scope.profileChange = {
-    //     language: 'en'
-    // };
+
+
+
+    //CONTACTS
+    $scope.remove = false;
+    $scope.removeToggle = function(value, del){
+        $scope.remove = value;
+        if(del){
+            $scope.removeContact(null);
+        }
+    };
+
+    $scope.selectContactToggle = function(index){
+        $scope.selectedContact[index] = !$scope.selectedContact[index];
+    };
+
+    //Contact remove function
+    $scope.removeContact = function(index){
+        //List of contacts to be effectively removed
+        let removeList = [];
+        //If we get an index is because the trash can or reject button were pressed
+        if(index !== null){
+            removeList.push($scope.contacts[index].contactId);
+            $scope.contacts[index].status = 0;
+            updateOnDelete($scope.contacts[index].contactId);
+
+        }
+        //Otherwise, a list of contacts must exist
+        else{
+            for(let i in $scope.selectedContact){
+                if($scope.selectedContact[i]) {
+                    removeList.push($scope.contacts[i].contactId);
+                    $scope.contacts[i].status = 0;
+                    updateOnDelete($scope.contacts[i].contactId);
+
+                }
+            }
+            $scope.selectedContact = []; //Clear the "checkbox" array
+        }
+
+        //If the remove list have elements, delete them from the database
+        if(removeList.length > 0){
+            config = {
+                params: {
+                    userId: RESTapi.getUser(),
+                    contacts: removeList
+                }
+            };
+            RESTapi.deleteContact(config)
+            .then(
+                (response) => {},
+                (reason) => {}
+            )
+        }
+    };
+
+    RESTapi.ioOn('remove contact', function(contact){
+        for(let i in $scope.contacts){
+            if($scope.contacts[i].contactId === contact){
+                $timeout(function(){
+                    $scope.contacts[i].status = 0;
+                    $scope.selectedContact[i] = false; //Clear the "checkbox" of the deleted item
+                }, 0);
+                break;
+            }
+        }
+    });
+
+    //Remove element from the user view
+    let updateOnDelete = function(contact){
+        //Remove this user data from the contact database
+        config = {
+            params: {
+                userId: contact,
+                contacts: [RESTapi.getUser()]
+            }
+        };
+        RESTapi.deleteContact(config)
+        .then(
+            (response) => {
+                RESTapi.ioEmit('contact deleted', {room:contact, contact:RESTapi.getUser()}); //Tell the contact to "status = 0" this user
+            },
+            (reason) => {}
+        );
+    };
+
+    $scope.acceptContactRequest = function(index){
+        //Update contact in the user database
+        $scope.contacts[index].status = 300; //Request accepted
+        let updateContact = {
+            id: RESTapi.getUser(),
+            contact: $scope.contacts[index]
+        };
+        RESTapi.insertUpdateContact(updateContact)
+        .then(
+            (response) => {},
+            (reason) => {}
+        );
+
+        //Update user data in the contact database
+        updateContact = {
+            id: $scope.contacts[index].contactId,
+            contact: {
+                contactId: RESTapi.getUser(),
+                username: RESTapi.getUsername(),
+                viewname: RESTapi.getUsername(),
+                profilePicture: RESTapi.getUserPicture(),
+                status: 300
+            }
+        };
+        RESTapi.insertUpdateContact(updateContact)
+        .then(
+            (response) => {
+                RESTapi.ioEmit('accept request', {room:$scope.contacts[index].contactId, contact:RESTapi.getUser()});
+            },
+            (reason) => {}
+        )
+    };
+
+    RESTapi.ioOn('request accepted', function(contact){
+        for(let i in $scope.contacts){
+            if($scope.contacts[i].contactId === contact){
+                $timeout(function(){
+                    $scope.contacts[i].status = 300;
+                }, 0);
+                break;
+            }
+        }
+    });
+
+    $scope.addContact = function(event){
+        $mdDialog.show({
+            controller: DialogController,
+            templateUrl: '../views/dialog/addUser.html',
+            parent: angular.element(document.body),
+            targetEvent: event
+        })
+            .then(
+                (response) => {
+
+                },
+                (reason) => {
+
+                }
+            )
+    };
+
+    let DialogController = function($scope, $mdDialog){
+        $scope.tags = [];
+        let rejected = {
+            notEmail: [],
+            notFound: [],
+            ownEmail: false
+        };
+
+        $scope.hide = function(){
+            $mdDialog.hide();
+        };
+        $scope.cancel = function(){
+            $mdDialog.cancel();
+        };
+        $scope.answer = function(answer){
+            $mdDialog.hide(answer);
+        };
+
+        //Validate the adding contacts list and add them to the corresponding user
+        $scope.validateAddContacts = function(ev){
+            let promises = [];
+            let contacts = [];
+            $scope.tags.forEach(function(contact, index){
+                //Validate the contact is an email
+                if(EMAIL_RE.test(contact)){
+                    //Check that the email is not the contact's own email
+                    if(contact === RESTapi.getUserEmail()){
+                        rejected.ownEmail = true;
+                    }
+                    else{
+                        //Configure the contacts search and populate a Promise array
+                        config.params = {
+                            searchBy: { email: contact },
+                            fields: 'email username profilePicture'
+                        };
+                        contacts.push(contact);
+                        promises.push(RESTapi.userData(config));
+                    }
+                }
+                else{
+                    rejected.notEmail.push(contact);
+                }
+            });
+
+            //Once all promises return, continue
+            let reqPromises = [];
+            $q.all(promises)
+            .then(
+                (values) => {
+                    values.forEach(function(contact, index){
+                        if(contact['data']){
+                            //Add the contact to the user
+                            let addContact = {
+                                id: RESTapi.getUser(),
+                                contact: {
+                                    contactId: contact['data']._id,
+                                    username: contact['data'].username,
+                                    viewname: contact['data'].username,
+                                    profilePicture: contact['data'].profilePicture,
+                                    status: 100
+                                }
+                            };
+                            RESTapi.insertUpdateContact(addContact)
+                            .then(
+                                (response) => {
+                                    //Signal the contact that new contacts have been added
+                                    //The server will signal the user to add the contacts through its own
+                                    //room --> user._id, and to load them into the list
+                                    RESTapi.ioEmit('new contacts', contact['data']._id);
+                                }
+                            );
+
+                            //And add the user to the contact
+                            addContact = {
+                                id: contact['data']._id,
+                                contact: {
+                                    contactId: RESTapi.getUser(),
+                                    username: RESTapi.getUsername(),
+                                    viewname: RESTapi.getUsername(),
+                                    profilePicture: RESTapi.getUserPicture(),
+                                    status: 200
+                                }
+                            };
+                            reqPromises.push(RESTapi.insertUpdateContact(addContact));
+                        }
+                        else{
+                            rejected.notFound.push(contacts[index]);
+                        }
+                    });
+
+                    //After all promises to the requester are fulfilled, load the contacts list
+                    $q.all(reqPromises)
+                    .then(
+                        (response) => {
+                            RESTapi.ioEmit('new contacts', RESTapi.getUser());
+                        },
+                        (reason) => {console.log('Failed?');}
+                    );
+
+                    //Create contacts rejected message, if any, show an alert
+                    let rejectedContacts:string = "";
+                    if(rejected.ownEmail){
+                        rejectedContacts += `Can\'t add yourself as a contact.`;
+                    }
+                    if(rejected.notFound.length > 0){
+                        rejectedContacts += ` The following contacts are not in our database:
+                        ${rejected.notFound.length === 1 ? rejected.notFound[0] : rejected.notFound.join(", ")}.`;
+                    }
+                    if(rejected.notEmail.length > 0){
+                        rejectedContacts += ` The following contacts are not in e-mail format:
+                        ${rejected.notEmail.length === 1 ? rejected.notEmail[0] : rejected.notEmail.join(", ")}.`;
+                    }
+
+                    //If there is invalid input, then show the alert
+                    if(rejectedContacts !== ""){
+                        $mdDialog.show(
+                            $mdDialog.alert()
+                            .parent(angular.element(document.body))
+                            .clickOutsideToClose(true)
+                            .title('Contact Alert')
+                            .textContent(rejectedContacts)
+                            .ariaLabel(rejectedContacts)
+                            .ok('Close')
+                            .targetEvent(ev)
+                        );
+                    }
+                },
+                (reason) => {console.log('Failed?');}
+            );
+
+            $scope.hide();
+        };
+
+    };
+
+    $scope.editViewName = function(event, index, status){
+        if(status < 300){
+            //Cannot modify unaccepted contacts viewname
+            $mdDialog.show(
+                $mdDialog.alert()
+                .parent(angular.element(document.body))
+                .clickOutsideToClose(true)
+                .title('Contact Alert')
+                .textContent('Cannot modify the username of unaccepted contacts')
+                .ariaLabel('Cannot modify the username of unaccepted contacts')
+                .ok('Close')
+                .targetEvent(event)
+            );
+        }
+        else{
+            //Edit the contact's viewname
+            let confirm = $mdDialog.prompt()
+                .title('How do you know to' + $scope.contacts[index].viewname + '?')
+                .placeholder('Username')
+                .ariaLabel('Username')
+                .initialValue($scope.contacts[index].viewname)
+                .targetEvent(event)
+                .ok('Change username')
+                .cancel('Cancel');
+
+            $mdDialog.show(confirm)
+                .then(
+                    function(response){
+                        //Show an alert if the viewname is empty
+                        if(response === ""){
+                            $mdDialog.show(
+                                $mdDialog.alert()
+                                .parent(angular.element(document.body))
+                                .clickOutsideToClose(true)
+                                .title('Contact Username Alert')
+                                .textContent('Contacts must have a username')
+                                .ariaLabel('Contacts must have a username')
+                                .ok('Close')
+                                .targetEvent(event)
+                            );
+                        }
+                        //Modify the contact's username
+                        else{
+                            //Update contact viewname in the database
+                            $scope.contacts[index].viewname = response;
+                            let updateContact = {
+                                id: RESTapi.getUser(),
+                                contact: $scope.contacts[index]
+                            };
+                            RESTapi.insertUpdateContact(updateContact)
+                            .then(
+                                (response) => {
+                                    $mdDialog.show(
+                                        $mdDialog.alert()
+                                        .parent(angular.element(document.body))
+                                        .clickOutsideToClose(true)
+                                        .title('Contact Username Changed')
+                                        .textContent('Your viewname for ' + $scope.contacts[index].username + ' is now ' + $scope.contacts[index].viewname)
+                                        .ariaLabel('Your viewname for ' + $scope.contacts[index].username + ' is now ' + $scope.contacts[index].viewname)
+                                        .ok('Close')
+                                        .targetEvent(event)
+                                    );
+                                },
+                                (reason) => {}
+                            )
+                        }
+                    },
+                    function(reason){}
+                )
+        }
+    };
+
+    //TODO Get the contact by index, go to the contact chat, put it on top and open it in the chat area
+    $scope.goToChat = function(event, index, status){
+        if(status < 300){
+            //User have not been accepted yet by the contact
+            if(status === 100){
+                $mdDialog.show(
+                    $mdDialog.alert()
+                    .parent(angular.element(document.body))
+                    .clickOutsideToClose(true)
+                    .title('Contact Alert')
+                    .textContent($scope.contacts[index].viewname + ' has not accepted your Contact Request yet')
+                    .ariaLabel($scope.contacts[index].viewname + ' has not accepted your Contact Request yet')
+                    .ok('Close')
+                    .targetEvent(event)
+                );
+            }
+            //The user have not accepted the contact request yet
+            if(status === 200){
+                $mdDialog.show(
+                    $mdDialog.alert()
+                    .parent(angular.element(document.body))
+                    .clickOutsideToClose(true)
+                    .title('Contact Alert')
+                    .textContent('Accept ' + $scope.contacts[index].viewname + '\'s Contact Request to chat')
+                    .ariaLabel('Accept ' + $scope.contacts[index].viewname + '\'s Contact Request to chat')
+                    .ok('Close')
+                    .targetEvent(event)
+                );
+            }
+            return;
+        }
+
+        console.log('go to chat with ' + $scope.contacts[index].contactId);
+    }
+
+
+
+
+    //CHATS MENU
+    //TODO All the chat thing
 }]);

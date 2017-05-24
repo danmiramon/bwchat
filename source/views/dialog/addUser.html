@@ -1,0 +1,30 @@
+<md-dialog id="addUserDialog" aria-label="Add User Dialog">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h3>Add Contacts</h3>
+            <span flex></span>
+            <md-button>
+                <md-icon class="material-icons md-24" ng-click="cancel()">clear</md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+
+    <div>
+        <p md-title>Invite friends to chat with you</p>
+    </div>
+
+    <md-dialog-content flex>
+            <md-chips
+                ng-model="tags"
+                placeholder="Contact email"
+                readonly="false"
+                md-removable="true"
+            ></md-chips>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+        <span flex></span>
+        <md-button ng-click="validateAddContacts($event)" ng-disabled="tags.length === 0">Add</md-button>
+        <md-button ng-click="cancel()">Cancel</md-button>
+    </md-dialog-actions>
+</md-dialog>

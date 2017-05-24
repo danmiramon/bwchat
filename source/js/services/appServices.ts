@@ -1,12 +1,18 @@
 angular.module("chatApp")
 .factory("RESTapi", ["$http", "$location", "$q", function($http, $location, $q){
     let error = null;
-    let user = null;
+    let userId = null;
+    let username = null;
+    let userPicture = null;
+    let userEmail = null;
     let socket:SocketIOClient.Socket = null;
 
     return {
         getError: function(){return error;},
-        getUser: function(){return user;},
+        getUser: function(){return userId;},
+        getUsername: function(){return username;},
+        getUserPicture: function(){return userPicture;},
+        getUserEmail: function(){return userEmail;},
 
         //USER LOGIN/SIGNUP
         checkLoggedIn: function(source = null){
@@ -18,7 +24,7 @@ angular.module("chatApp")
 
                     if(response.data !== '0'){
                         deferred.resolve();
-                        user = response.data['_id'];
+                        // user = response.data['_id'];
 
                         if(source !== '/chat'){
                             $location.url('/chat');
@@ -27,7 +33,7 @@ angular.module("chatApp")
                         this.ioEmit('login');
                     }
                     else{
-                        error = 'You need to login.';
+                        // error = 'You need to login.';
                         deferred.resolve();
                         if(source !== '/'){
                             $location.url('/');
@@ -39,33 +45,47 @@ angular.module("chatApp")
         },
 
         login: function(user){
-            $http.post('/login', user)
-            .then((response) => {
-                    $location.url('/chat');
-                },
-                (reason)=>{
-                    error = 'User/Password Incorrect.';
-                }
-            );
+            return $http.post('/login', user)
+                .then((response) => {
+                        userId = response.data['_id'];
+                        username = response.data['username'];
+                        userPicture = response.data['profilePicture'];
+                        userEmail = response.data['email'];
+                        this.ioEmit('join room', userId);
+                        $location.url('/chat');
+                        return response.data;
+                    },
+                    (reason)=>{
+                        error = 'User/Password Incorrect.';
+                        return error;
+                    }
+                );
         },
 
         signup: function(user){
-            $http.post('/signup', user)
-            .then((response)=>{
-                if(response.data){
-                    $location.url('/chat');
-                }
-                else{
-                    error = 'User already exists. Please log in.'
-                }
-            });
+            return $http.post('/signup', user)
+                .then((response)=>{
+                    if(response.data){
+                        userId = response.data['_id'];
+                        username = response.data['username'];
+                        userPicture = response.data['profilePicture'];
+                        userEmail = response.data['email'];
+                        this.ioEmit('join room', userId);
+                        $location.url('/chat');
+                        return response.data;
+                    }
+                    else{
+                        error = 'User already exists. Please log in.';
+                        return error;
+                    }
+                });
         },
 
         logout: function(){
             $http.post('/logout', null)
             .then(()=>{
                 error = null;
-                user = null;
+                userId = null;
                 this.ioClose();
                 $location.url('/');
             });
@@ -78,16 +98,38 @@ angular.module("chatApp")
             .then(
                 (response) => {
                     return { data: response.data };
-                }
+                },
+                (reject) => {}
             );
         },
 
         updateUserData: function(data){
-            return $http.put('/updateUserData', data)
+            return $http.post('/updateUserData', data)
             .then(
                 (response) => {
                     return response.data;
-                }
+                },
+                (reject) => {}
+            )
+        },
+
+        insertUpdateContact: function(data){
+            return $http.post('/insertUpdateContact', data)
+            .then(
+                (response) => {
+                    return response.data;
+                },
+                (reject) => {}
+            )
+        },
+
+        deleteContact: function(data){
+            return $http.delete('/deleteUserContact', data)
+            .then(
+                (response) => {
+                    return response.data;
+                },
+                (reject) => {}
             )
         },
 

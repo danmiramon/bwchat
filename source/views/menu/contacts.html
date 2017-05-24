@@ -1,1 +1,72 @@
-<div>Contacts</div>
+<md-content>
+    <div layout="row" layout-align="center center">
+        <md-input-container flex="60">
+            <label>Sort by</label>
+            <md-select ng-model="contacts.sortby" >
+                <md-option value="name" ng-click="sortBy('contacts', 'viewname')">Name</md-option>
+                <md-option value="date" ng-click="sortBy('contacts', 'creationDate')">Date</md-option>
+            </md-select>
+        </md-input-container>
+
+        <!--ADD CONTACT-->
+        <!--Add button-->
+        <md-button ng-click="addContact($event)" flex>
+            <md-tooltip md-direction="top" md-autohide="true">Add Contacts</md-tooltip>
+            <md-icon class="material-icons md-24">person_add</md-icon>
+        </md-button>
+        <!--Add dialog box-->
+
+        <!--REMOVE CONTACTS-->
+        <!--Remove button-->
+        <md-button ng-hide="remove" ng-click="removeToggle(true, false)" flex>
+            <md-tooltip md-direction="top" md-autohide="true">Remove Contacts</md-tooltip>
+            <md-icon class="material-icons md-24">remove_circle</md-icon>
+        </md-button>
+        <!--Remove done button-->
+        <md-button ng-show="remove" ng-click="removeToggle(false, true)" flex>
+            <md-tooltip md-direction="top" md-autohide="true">Done</md-tooltip>
+            <md-icon class="material-icons md-24">done</md-icon>
+        </md-button>
+    </div>
+
+    <md-divider></md-divider>
+
+    <!--CONTACTS-->
+    <md-content>
+        <md-list class="md-dense">
+            <md-list-item ng-repeat="contact in contacts" class="noright" ng-show="contact.status !== 0" ng-click="goToChat($event, $index, contact.status)">
+                <!--USER INFO-->
+                <img ng-src="{{contact.profilePicture}}" class="md-avatar">
+                <p>{{contact.viewname}}</p>
+
+                <span flex></span>
+
+                <!--EDIT VIEWNAME-->
+                <md-icon class="md-material md-24 md-secondary" ng-click="editViewName($event, $index, contact.status)" ng-hide="remove" aria-label="Edit viewname">edit</md-icon>
+
+                <!--DELETE CONTACT-->
+                <md-checkbox class="md-secondary" ng-show="remove" ng-click="selectContactToggle($index)" aria-label="Select contact"></md-checkbox>
+                <md-icon ng-show="remove" ng-click="removeContact($index)" class="md-material md-24 md-secondary" aria-label="Remove contact">delete</md-icon>
+
+                <!--CONTACT REQUEST MENU-->
+                <md-menu class="md-secondary" md-position-mode="target-right target" ng-show="contact.status === 200">
+                    <md-button class="md-icon-button" ng-mouseenter="$mdMenu.open()">
+                        <md-icon class="md-material md-warn" md-menu-origin>new_releases</md-icon>
+                    </md-button>
+                    <md-menu-content width="2" ng-mouseleave="$mdMenu.close()">
+                        <md-menu-item>
+                            <md-button class="md-icon-button" ng-click="acceptContactRequest($index)">
+                                <md-tooltip md-direction="top" md-autohide="true">Accept Request</md-tooltip>
+                                <md-icon class="md-material" md-menu-align-target>check</md-icon>
+                            </md-button>
+                            <md-button class="md-icon-button" ng-click="removeContact($index)">
+                                <md-tooltip md-direction="top" md-autohide="true">Reject Request</md-tooltip>
+                                <md-icon class="md-material" md-menu-align-target>clear</md-icon>
+                            </md-button>
+                        </md-menu-item>
+                    </md-menu-content>
+                </md-menu>
+            </md-list-item>
+        </md-list>
+    </md-content>
+</md-content>

@@ -19,12 +19,16 @@ export interface IUser extends mongoose.Document{
 //Sub Schemas
 let contact: mongoose.Schema = new mongoose.Schema({
     contactId:{type: mongoose.Schema.Types.ObjectId},
-    viewName:{type: String},
-    active:{type: Boolean}
+    username:{type: String},
+    viewname:{type: String},
+    profilePicture:{type: String},
+    status:{type: Number} //100 - Contact request from this user
+                          //200 - Contact request to this user
+                          //300 - Contact request accepted
 });
 
 let chat: mongoose.Schema = new mongoose.Schema({
-    chatId:{type: mongoose.Schema.Types.ObjectId},
+    chatRoom:{type: String},
     active:{type: Boolean}
 });
 
