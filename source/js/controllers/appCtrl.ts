@@ -165,6 +165,7 @@ angular.module('chatApp')
     });
 
     $scope.dataLoad = function(menu){
+        contactsSelected = [];
         switch(menu){
             case 'Profile': {
                 profileLoad();
@@ -214,16 +215,27 @@ angular.module('chatApp')
 
 
     //CONTACTS & CHATS
-    //Sorting elements. Receives a collection name, a field and a reverse sort boolean
-    $scope.sortBy = function(collection, field, reverse){
-        $scope[collection] = orderBy($scope[collection], field, reverse);
-        $scope.remove = false;
+    //Checkbox control functions
+    let contactsSelected = [];
+
+    $scope.toggle = function(index){
+        let i = contactsSelected.indexOf(index);
+        if(i > -1){
+            contactsSelected.splice(i, 1);
+        }
+        else{
+            contactsSelected.push(index);
+        }
+    };
+
+    $scope.exists = function(index){
+        return contactsSelected.indexOf(index) > -1;
     };
 
     //Toogles the multi remove button
     $scope.removeToggle = function(collection, event, value, del){
         $scope.remove = value;
-        if(del){
+        if(contactsSelected.length > 0){
             switch(collection){
                 case 'contacts':{
                     $scope.removeContact(event, null);
@@ -236,14 +248,19 @@ angular.module('chatApp')
         }
     };
 
+    //Sorting elements. Receives a collection name, a field and a reverse sort boolean
+    $scope.sortBy = function(collection, field, reverse){
+        contactsSelected = [];
+        $scope[collection] = orderBy($scope[collection], field, reverse);
+        $scope.remove = false;
+    };
+
+
+
 
 
 
     //CONTACTS
-    $scope.selectContactToggle = function(index){
-        $scope.selectedContact[index] = !$scope.selectedContact[index];
-    };
-
     //Contact remove function
     $scope.removeContact = function(event, index){
         let confirm = $mdDialog.confirm()
@@ -265,18 +282,16 @@ angular.module('chatApp')
                     $scope.contacts[index].status = 0;
                     updateOnDelete($scope.contacts[index].contactId);
 
+                    if($scope.exists(index)){ $scope.toggle(index); }
                 }
-                //Otherwise, a list of contacts must exist
+                // //Otherwise, a list of contacts must exist
                 else{
-                    for(let i in $scope.selectedContact){
-                        if($scope.selectedContact[i]) {
-                            removeList.push($scope.contacts[i].contactId);
-                            $scope.contacts[i].status = 0;
-                            updateOnDelete($scope.contacts[i].contactId);
-
-                        }
+                    for(let i of contactsSelected){
+                        removeList.push($scope.contacts[i].contactId);
+                        $scope.contacts[i].status = 0;
+                        updateOnDelete($scope.contacts[i].contactId);
                     }
-                    $scope.selectedContact = []; //Clear the "checkbox" array
+                    contactsSelected = [];
                 }
 
                 //If the remove list have elements, delete them from the database
@@ -303,7 +318,7 @@ angular.module('chatApp')
             if($scope.contacts[i].contactId === contact){
                 $timeout(function(){
                     $scope.contacts[i].status = 0;
-                    $scope.selectedContact[i] = false; //Clear the "checkbox" of the deleted item
+                    if($scope.exists(i)){ $scope.toggle(i); } //Remove the "checkbox" of the deleted item if selected
                 }, 0);
                 break;
             }
@@ -504,12 +519,12 @@ angular.module('chatApp')
 
 
     //Add chat
-    //TODO Refactor for chats
     $scope.addChat = function(event){
         $mdDialog.show({
             controller: 'ChatDialogController',
             templateUrl: '../views/dialog/addChat.html',
             parent: angular.element(document.body),
+            multiple: true,
             targetEvent: event,
             locals: {contactList: $scope.contacts}
         })
@@ -805,7 +820,7 @@ angular.module('chatApp')
 
 .controller("ChatDialogController", ["$scope", "$mdDialog", "contactList", function($scope, $mdDialog, contactList){
     $scope.contactList = contactList;
-    let contactsSelected = []; //Contains the contacts indexes
+    $scope.contactsSelected = []; //Contains the contacts indexes
 
     //Show control functions
     $scope.hide = function(){
@@ -820,18 +835,64 @@ angular.module('chatApp')
 
     //Checkbox control functions
     $scope.toggle = function(index){
-        let i = contactsSelected.indexOf(index);
+        let i = $scope.contactsSelected.indexOf(index);
         if(i > -1){
-            contactsSelected.splice(i, 1);
+            $scope.contactsSelected.splice(i, 1);
         }
         else{
-            contactsSelected.push(index);
+            $scope.contactsSelected.push(index);
         }
     };
-
     $scope.exists = function(index){
-        return contactsSelected.indexOf(index) > -1;
+        return $scope.contactsSelected.indexOf(index) > -1;
     };
+
+    //Group settings
+    //$scope.groupName is available through ng-model
+    $scope.groupPicture = 0;
+    $scope.groupPictures = [
+        'img/groupPictures/gp1.png',
+        'img/groupPictures/gp2.png',
+        'img/groupPictures/gp3.png',
+        'img/groupPictures/gp4.png',
+        'img/groupPictures/gp5.png',
+        'img/groupPictures/gp6.png',
+        'img/groupPictures/gp7.png',
+        'img/groupPictures/gp8.png',
+        'img/groupPictures/gp9.png',
+        'img/groupPictures/gp10.png'
+    ];
+    $scope.isGroup = function(){
+        return $scope.contactsSelected.length > 1;
+    };
+
+    $scope.selectPic = function(index){
+        $scope.groupPicture = index;
+    };
+
+    //Validate the chat creation parameters, if everything good, create the chat and notificate the users
+    $scope.validateNewChat = function(ev){
+        if($scope.contactsSelected.length > 1 && (!$scope.groupName || $scope.groupName === "")){
+            $mdDialog.show(
+                $mdDialog.alert()
+                .parent(angular.element(document.body))
+                .clickOutsideToClose(true)
+                .title('Chat Room Alert')
+                .textContent('Please provide a name for your group')
+                .ariaLabel('Please provide a name for your group')
+                .ok('Close')
+                .multiple(true)
+                .targetEvent(ev)
+            );
+        }
+        else{
+            //TODO Add multiple(true) to all multi alerts in the program
+            //TODO Create the chat
+
+            $scope.hide();
+        }
+    }
+
 
     //Validate the adding contacts list and add them to the corresponding user
     /*$scope.validateAddContacts = function(ev){

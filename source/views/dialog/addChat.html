@@ -11,31 +11,41 @@
     <md-dialog-content layout="column" layout-align="start center">
         <p>Select Contacts:</p>
         <div md-whiteframe="1">
-        <md-list class="md-dense" layout="row">
-            <md-list-item class="noright" md-whiteframe="10" ng-repeat="contact in contactList">
-                <md-checkbox ng-checked="exists($index)" ng-click="toggle($index)" aria-label="Select contact"></md-checkbox>
-                <img ng-src="{{contact.profilePicture}}" class="md-avatar">
-                <p>{{contact.viewname}}</p>
-            </md-list-item>
-        </md-list>
+            <md-list class="md-dense" layout="row" layout-wrap>
+                <md-list-item class="noright" md-whiteframe="10" ng-repeat="contact in contactList">
+                    <md-checkbox ng-checked="exists($index)" ng-click="toggle($index)" aria-label="Select contact"></md-checkbox>
+                    <img ng-src="{{contact.profilePicture}}" class="md-avatar">
+                    <p>{{contact.viewname}}</p>
+                </md-list-item>
+            </md-list>
         </div>
 
+        <div ng-show="isGroup()">
+            <md-divider></md-divider>
 
-        <p>Select Chat Room Image:</p>
-        <md-content>
-            Content here
-        </md-content>
-        <!--<md-chips
-                ng-model="tags"
-                placeholder="Contact email"
-                readonly="false"
-                md-removable="true"
-        ></md-chips>-->
+            <p>Select Chat Room Image:</p>
+            <div md-whiteframe="1">
+                <md-list class="md-dense" layout="row" layout-wrap layout-align="center center">
+                    <md-list-item class="noright" md-whiteframe="10" ng-repeat="picture in groupPictures">
+                        <img ng-src="{{picture}}" class="pictureList" ng-class="{selectedPic: groupPicture === $index}" ng-click="selectPic($index)">
+                    </md-list-item>
+                </md-list>
+            </div>
+
+            <md-divider></md-divider>
+
+            <md-input-container>
+                <label>Group Name:</label>
+                <input type="text" ng-model="groupName">
+            </md-input-container>
+        </div>
     </md-dialog-content>
+
+    <div flex></div>
 
     <md-dialog-actions layout="row">
         <span flex></span>
-        <!--<md-button ng-click="validateAddContacts($event)" ng-disabled="tags.length === 0">Add</md-button>-->
+        <md-button ng-click="validateNewChat($event)" ng-disabled="contactsSelected.length === 0">Create</md-button>
         <md-button ng-click="cancel()">Cancel</md-button>
     </md-dialog-actions>
 </md-dialog>

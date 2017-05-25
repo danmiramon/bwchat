@@ -47,7 +47,7 @@
                 <md-icon class="md-material md-24 md-secondary" ng-click="editViewName($event, $index, contact.status)" ng-hide="remove" aria-label="Edit viewname">edit</md-icon>
 
                 <!--DELETE CONTACT-->
-                <md-checkbox class="md-secondary" ng-show="remove" ng-click="selectContactToggle($index)" aria-label="Select contact"></md-checkbox>
+                <md-checkbox class="md-secondary" ng-show="remove" ng-checked="exists($index)" ng-click="toggle($index)" aria-label="Select contact"></md-checkbox>
                 <md-icon ng-show="remove" ng-click="removeContact($event, $index)" class="md-material md-24 md-secondary" aria-label="Remove contact">delete</md-icon>
 
                 <!--CONTACT REQUEST MENU-->

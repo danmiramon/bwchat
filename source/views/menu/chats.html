@@ -46,7 +46,7 @@
                 <md-icon class="md-material md-24 md-secondary" ng-click="editChatRoom($event, $index)" ng-hide="remove" aria-label="Edit chatroom">edit</md-icon>
 
                 <!--DELETE CHAT ROOM-->
-                <md-checkbox class="md-secondary" ng-show="remove" ng-click="selectChatToggle($index)" aria-label="Select chatroom"></md-checkbox>
+                <md-checkbox class="md-secondary" ng-show="remove" ng-checked="exists($index)" ng-click="toggle($index)" aria-label="Select chatroom"></md-checkbox>
                 <md-icon ng-show="remove" ng-click="removeChat($event, $index)" class="md-material md-24 md-secondary" aria-label="Remove chatroom">delete</md-icon>
             </md-list-item>
         </md-list>

@@ -44,7 +44,7 @@ body{
 }
 
 .addDialog{
-  min-width: 60%;
+  width: 60%;
   height: 50%;
 }
 
@@ -55,4 +55,8 @@ body{
 .md-toolbar-slim{
   font-size: 14px;
   min-height: 16px;
+}
+
+.selectedPic{
+  border: 3px solid forestgreen;
 }
