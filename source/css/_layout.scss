@@ -43,7 +43,16 @@ body{
   font-size:12px;
 }
 
-#addUserDialog{
-  width: 60%;
-  height: 40%;
+.addDialog{
+  min-width: 60%;
+  height: 50%;
+}
+
+.mdCursor{
+  cursor: pointer;
+}
+
+.md-toolbar-slim{
+  font-size: 14px;
+  min-height: 16px;
 }

@@ -1,1 +1,54 @@
-<div>Chats</div>
+<md-content>
+    <div layout="row" layout-align="center center">
+        <md-input-container flex="60">
+            <label>Sort by</label>
+            <md-select ng-model="chats.sortby" >
+                <md-option value="name" ng-click="sortBy('chats', 'chatname', false)">Name</md-option>
+                <md-option value="nameDesc" ng-click="sortBy('chats', 'chatname', true)">Name (desc)</md-option>
+                <md-option value="date" ng-click="sortBy('chats', 'creationDate', false)">Date</md-option>
+                <md-option value="dateDesc" ng-click="sortBy('chats', 'creationDate', true)">Date (desc)</md-option>
+            </md-select>
+        </md-input-container>
+
+        <!--ADD CHAT-->
+        <!--Add button-->
+        <md-button ng-click="addChat($event)" flex>
+            <md-tooltip md-direction="top" md-autohide="true">Create Chat Room</md-tooltip>
+            <md-icon class="material-icons md-24">forum</md-icon>
+        </md-button>
+
+        <!--REMOVE CHATS-->
+        <!--Remove button-->
+        <md-button ng-hide="remove" ng-click="removeToggle('chats', $event, true, false)" flex>
+            <md-tooltip md-direction="top" md-autohide="true">Remove Chat Rooms</md-tooltip>
+            <md-icon class="material-icons md-24">remove_circle</md-icon>
+        </md-button>
+        <!--Remove done button-->
+        <md-button ng-show="remove" ng-click="removeToggle('chats', $event, false, true)" flex>
+            <md-tooltip md-direction="top" md-autohide="true">Done</md-tooltip>
+            <md-icon class="material-icons md-24">done</md-icon>
+        </md-button>
+    </div>
+
+    <md-divider></md-divider>
+
+    <!--CHATS-->
+    <md-content>
+        <md-list class="md-dense">
+            <md-list-item ng-repeat="chat in chats" class="noright" ng-click="openChat($event, $index)">
+                <!--CHAT INFO-->
+                <img ng-src="{{chat.chatPicture}}" class="md-avatar">
+                <p>{{chat.chatname}}</p>
+
+                <span flex></span>
+
+                <!--EDIT CHAT ROOM-->
+                <md-icon class="md-material md-24 md-secondary" ng-click="editChatRoom($event, $index)" ng-hide="remove" aria-label="Edit chatroom">edit</md-icon>
+
+                <!--DELETE CHAT ROOM-->
+                <md-checkbox class="md-secondary" ng-show="remove" ng-click="selectChatToggle($index)" aria-label="Select chatroom"></md-checkbox>
+                <md-icon ng-show="remove" ng-click="removeChat($event, $index)" class="md-material md-24 md-secondary" aria-label="Remove chatroom">delete</md-icon>
+            </md-list-item>
+        </md-list>
+    </md-content>
+</md-content>

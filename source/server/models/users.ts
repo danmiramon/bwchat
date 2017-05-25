@@ -22,14 +22,24 @@ let contact: mongoose.Schema = new mongoose.Schema({
     username:{type: String},
     viewname:{type: String},
     profilePicture:{type: String},
+    creationDate:{
+        type: Date,
+        default: new Date()
+    },
     status:{type: Number} //100 - Contact request from this user
                           //200 - Contact request to this user
                           //300 - Contact request accepted
 });
 
 let chat: mongoose.Schema = new mongoose.Schema({
-    chatRoom:{type: String},
-    active:{type: Boolean}
+    chatId: mongoose.Schema.Types.ObjectId, //This is also the chat room
+    chatname:{type: String},
+    chatPicture:{type: String},
+    creationDate:{
+        type: Date,
+        default: new Date()
+    },
+    sta:{type: Boolean}
 });
 
 
