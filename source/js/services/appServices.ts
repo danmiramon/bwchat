@@ -133,6 +133,52 @@ angular.module("chatApp")
             )
         },
 
+        getUserContact: function(config){
+            return $http.get('/getUserContact', config)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                );
+        },
+
+        insertUserChat: function(data){
+            return $http.post('/insertUserChat', data)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                )
+        },
+
+
+
+
+
+        //CHAT ROOMS
+        createChatRoom: function(users){
+            return $http.post('/createChatRoom', users)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reason) => {}
+                );
+        },
+
+        getChat: function(config){
+            return $http.get('/getChat', config)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                );
+        },
+
+
 
         //SOCKET INTERFACE
         ioConnect: function(){

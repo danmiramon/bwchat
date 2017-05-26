@@ -65,6 +65,12 @@ app.get('/userData', routes.User.getData);
 app.post('/updateUserData', routes.User.updateData);
 app.post('/insertUpdateContact', routes.User.insertUpdateContact);
 app.delete('/deleteUserContact', routes.User.deleteUserContact);
+app.get('/getUserContact', routes.User.getUserContact);
+app.post('/insertUserChat', routes.User.insertUserChat);
+
+    //Chat room query routes
+app.post('/createChatRoom', routes.Chat.createChatRoom);
+app.get('/getChat', routes.Chat.getChat);
 
     //Main Socket Routes
 routes.Socket.setIO(io);

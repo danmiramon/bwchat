@@ -104,3 +104,26 @@ export function deleteUserContact(req:express.Request, res:express.Response){
     );
 }
 
+export function getUserContact(req:express.Request, res:express.Response){
+    User.findById(req.query.contactFrom, {contacts:{$elemMatch:{contactId: req.query.contactTo}}}, function(err, user){
+        if(err){
+            throw(err);
+        }
+
+        res.json(user);
+    });
+}
+
+export function insertUserChat(req:express.Request, res:express.Response){
+    User.findOneAndUpdate({'_id':req.body.id},
+        {$push: {chats: req.body.chat}},
+        {upsert:true, new:true},
+        function(err, user){
+            if(err){
+                throw(err);
+            }
+            res.json(req.body);
+        }
+    );
+}
+

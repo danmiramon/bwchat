@@ -12,7 +12,7 @@
         <p>Select Contacts:</p>
         <div md-whiteframe="1">
             <md-list class="md-dense" layout="row" layout-wrap>
-                <md-list-item class="noright" md-whiteframe="10" ng-repeat="contact in contactList">
+                <md-list-item ng-hide="contact.status < 300" class="noright" md-whiteframe="10" ng-repeat="contact in contactList" >
                     <md-checkbox ng-checked="exists($index)" ng-click="toggle($index)" aria-label="Select contact"></md-checkbox>
                     <img ng-src="{{contact.profilePicture}}" class="md-avatar">
                     <p>{{contact.viewname}}</p>
@@ -36,7 +36,7 @@
 
             <md-input-container>
                 <label>Group Name:</label>
-                <input type="text" ng-model="groupName">
+                <input type="text" ng-model="groupName" placeholder="My Chat Group">
             </md-input-container>
         </div>
     </md-dialog-content>

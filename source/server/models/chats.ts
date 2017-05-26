@@ -1,5 +1,10 @@
 import * as mongoose from "mongoose";
 
+//Chat interface
+export interface IChat extends mongoose.Document{
+    contacts: mongoose.Schema.Types.ObjectId[];
+}
+
 //Sub Schemas
 let message: mongoose.Schema = new mongoose.Schema({
     text:{type: String},
@@ -12,13 +17,8 @@ let message: mongoose.Schema = new mongoose.Schema({
 
 //Schemas
 let chatSchema: mongoose.Schema = new mongoose.Schema({
-    name: {
-        type: String,
-        default: 'chat'
-    },
-    participants: {type: [mongoose.Schema.Types.ObjectId]},
-    groupImage: {type:String},
-    messages:[message]
+    contacts: {type: [mongoose.Schema.Types.ObjectId]},
+    messages:{type: [message]}
 });
 
-export let Chat:mongoose.Model<mongoose.Document> = mongoose.model('Chat', chatSchema);
+export let Chat:mongoose.Model<IChat> = mongoose.model<IChat>('Chat', chatSchema);

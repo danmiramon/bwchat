@@ -14,6 +14,16 @@ export function setIO(sio){
             socket.join(room);
         });
 
+        socket.on('join chat room', function(room){
+            socket.join(room);
+            io.to(room).emit('open chat');
+        });
+
+        //Leave a room
+        socket.on('leave room', function(room){
+            socket.leave(room);
+        });
+
         //CONTACTS
         //Alert that new contacts have been added, send a message to load them into the list
         //Receive the room of the user to be notified
@@ -40,16 +50,15 @@ export function setIO(sio){
         //TODO Refactor on necessity
         //Alert that a new chat room have been created, send a message to load it
         //Receive the room of the user to be notified
-        socket.on('new chat', function(room){
-            console.log('New chat room: ' + room);
-            io.to(room).emit('load chats');
+        socket.on('chat room added', function(data){
+            io.to(data[0].id).emit('added new chat room', data[0].chat);
         });
 
         //Receive an alert of chat deletion, reply to the contacts to remove from list
-        socket.on('chat deleted', function(data){
-            console.log('Removing chat room');
-            io.to(data[0].room).emit('remove chat', data[0].contact);
-        });
+        // socket.on('chat deleted', function(data){
+        //     console.log('Removing chat room');
+        //     io.to(data[0].room).emit('remove chat', data[0].contact);
+        // });
     });
 }
 

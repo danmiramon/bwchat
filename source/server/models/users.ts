@@ -35,11 +35,6 @@ let chat: mongoose.Schema = new mongoose.Schema({
     chatId: mongoose.Schema.Types.ObjectId, //This is also the chat room
     chatname:{type: String},
     chatPicture:{type: String},
-    creationDate:{
-        type: Date,
-        default: new Date()
-    },
-    sta:{type: Boolean}
 });
 
 
