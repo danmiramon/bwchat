@@ -67,7 +67,7 @@ angular.module('chatApp')
     };
 }])
 
-.controller("menuCtrl", ["$scope", "$http", "$timeout", "orderByFilter", "$location", "$q", "$mdDialog", "$mdMenu", "RESTapi", "EMAIL_RE", function(
+.controller("menuCtrl", ["$scope", "$http", "$timeout", "orderByFilter", "$location", "$q", "$mdDialog", "$mdMenu", "RESTapi", function(
     $scope:angular.IScope,
     $http:angular.IHttpService,
     $timeout:angular.ITimeoutService,
@@ -77,7 +77,6 @@ angular.module('chatApp')
     $mdDialog,
     $mdMenu,
     RESTapi,
-    EMAIL_RE
 ){
     //Variables
     $scope.remove = false;
@@ -166,7 +165,7 @@ angular.module('chatApp')
     });
 
     $scope.dataLoad = function(menu){
-        contactsSelected = [];
+        elementsSelected = [];
         switch(menu){
             case 'Profile': {
                 profileLoad();
@@ -217,26 +216,26 @@ angular.module('chatApp')
 
     //CONTACTS & CHATS
     //Checkbox control functions
-    let contactsSelected = [];
+    let elementsSelected = [];
 
     $scope.toggle = function(index){
-        let i = contactsSelected.indexOf(index);
+        let i = elementsSelected.indexOf(index);
         if(i > -1){
-            contactsSelected.splice(i, 1);
+            elementsSelected.splice(i, 1);
         }
         else{
-            contactsSelected.push(index);
+            elementsSelected.push(index);
         }
     };
 
     $scope.exists = function(index){
-        return contactsSelected.indexOf(index) > -1;
+        return elementsSelected.indexOf(index) > -1;
     };
 
     //Toogles the multi remove button
     $scope.removeToggle = function(collection, event, value, del){
         $scope.remove = value;
-        if(contactsSelected.length > 0){
+        if(elementsSelected.length > 0){
             switch(collection){
                 case 'contacts':{
                     $scope.removeContact(event, null);
@@ -251,7 +250,7 @@ angular.module('chatApp')
 
     //Sorting elements. Receives a collection name, a field and a reverse sort boolean
     $scope.sortBy = function(collection, field, reverse){
-        contactsSelected = [];
+        elementsSelected = [];
         $scope[collection] = orderBy($scope[collection], field, reverse);
         $scope.remove = false;
     };
@@ -287,12 +286,12 @@ angular.module('chatApp')
                 }
                 // //Otherwise, a list of contacts must exist
                 else{
-                    for(let i of contactsSelected){
+                    for(let i of elementsSelected){
                         removeList.push($scope.contacts[i].contactId);
                         $scope.contacts[i].status = 0;
                         updateOnDelete($scope.contacts[i].contactId);
                     }
-                    contactsSelected = [];
+                    elementsSelected = [];
                 }
 
                 //If the remove list have elements, delete them from the database
@@ -477,7 +476,6 @@ angular.module('chatApp')
         }
     };
 
-    //TODO Get the contact by index, go to the contact chat, put it on top and open it in the chat area
     $scope.goToChat = function(event, index, status){
         if(status < 300){
             //User have not been accepted yet by the contact
@@ -509,8 +507,7 @@ angular.module('chatApp')
             return;
         }
 
-
-        //Create/open chat room
+        //If status >= 300, create/open chat room
         RESTapi.createChatRoom([$scope.contacts[index].contactId, RESTapi.getUser()])
             .then(
                 (response) => {
@@ -650,15 +647,11 @@ angular.module('chatApp')
     //Remove chat
     //Contact remove function
     //TODO Refactor for chats
-    $scope.selectChatToggle = function(index){
-        $scope.selectedContact[index] = !$scope.selectedContact[index];
-    };
-
     $scope.removeChat = function(event, index){
         let confirm = $mdDialog.confirm()
-            .title('Remove contact(s)?')
-            .textContent('Are you sure you want to remove this contact(s)?')
-            .ariaLabel('Remove contact(s)?')
+            .title('Remove chat room(s)?')
+            .textContent('Are you sure you want to remove this chat room(s)?')
+            .ariaLabel('Remove chat room(s)?')
             .targetEvent(event)
             .ok('Remove it')
             .cancel('Cancel');
@@ -666,16 +659,15 @@ angular.module('chatApp')
         $mdDialog.show(confirm)
             .then(
                 (response) => {
-                    //List of contacts to be effectively removed
+                    //List of chats to be effectively removed
                     let removeList = [];
-                    //If we get an index is because the trash can or reject button were pressed
+                    //If we get an index is because the trash can button were pressed
                     if(index !== null){
-                        removeList.push($scope.contacts[index].contactId);
-                        $scope.contacts[index].status = 0;
-                        updateOnDelete($scope.contacts[index].contactId);
+                        removeList.push($scope.chats[index].chatId);
+                        updateOnDelete($scope.chats[index].chatId);
 
                     }
-                    //Otherwise, a list of contacts must exist
+                    //Otherwise, a list of chats must exist
                     else{
                         for(let i in $scope.selectedContact){
                             if($scope.selectedContact[i]) {
@@ -720,65 +712,7 @@ angular.module('chatApp')
     });
 
 
-    //TODO Refactor for chats
-    //Edit chat room
-    $scope.editChatRoom = function(event, index){
 
-        //Edit the contact's viewname
-        let confirm = $mdDialog.prompt()
-            .title('Do you want to change ' + $scope.contacts[index].viewname + ' username?')
-            .placeholder('Username')
-            .ariaLabel('Username')
-            .initialValue($scope.contacts[index].viewname)
-            .targetEvent(event)
-            .ok('Change username')
-            .cancel('Cancel');
-
-        $mdDialog.show(confirm)
-            .then(
-                function(response){
-                    //Show an alert if the viewname is empty
-                    if(response === ""){
-                        $mdDialog.show(
-                            $mdDialog.alert()
-                                .parent(angular.element(document.body))
-                                .clickOutsideToClose(true)
-                                .title('Contact Username Alert')
-                                .textContent('Contacts must have a username')
-                                .ariaLabel('Contacts must have a username')
-                                .ok('Close')
-                                .targetEvent(event)
-                        );
-                    }
-                    //Modify the contact's username
-                    else{
-                        //Update contact viewname in the database
-                        $scope.contacts[index].viewname = response;
-                        let updateContact = {
-                            id: RESTapi.getUser(),
-                            contact: $scope.contacts[index]
-                        };
-                        RESTapi.insertUpdateContact(updateContact)
-                            .then(
-                                (response) => {
-                                    $mdDialog.show(
-                                        $mdDialog.alert()
-                                            .parent(angular.element(document.body))
-                                            .clickOutsideToClose(true)
-                                            .title('Contact Username Changed')
-                                            .textContent('Your viewname for ' + $scope.contacts[index].username + ' is now ' + $scope.contacts[index].viewname)
-                                            .ariaLabel('Your viewname for ' + $scope.contacts[index].username + ' is now ' + $scope.contacts[index].viewname)
-                                            .ok('Close')
-                                            .targetEvent(event)
-                                    );
-                                },
-                                (reason) => {}
-                            )
-                    }
-                },
-                function(reason){}
-            )
-    };
 
 
 
