@@ -20,12 +20,12 @@
 
         <!--REMOVE CONTACTS-->
         <!--Remove button-->
-        <md-button ng-hide="remove" ng-click="removeToggle('contacts', $event, true, false)" flex>
+        <md-button ng-hide="remove" ng-click="removeToggle('contacts', $event, true)" flex>
             <md-tooltip md-direction="top" md-autohide="true">Remove Contacts</md-tooltip>
             <md-icon class="material-icons md-24">remove_circle</md-icon>
         </md-button>
         <!--Remove done button-->
-        <md-button ng-show="remove" ng-click="removeToggle('contacts', $event, false, true)" flex>
+        <md-button ng-show="remove" ng-click="removeToggle('contacts', $event, false)" flex>
             <md-tooltip md-direction="top" md-autohide="true">Done</md-tooltip>
             <md-icon class="material-icons md-24">done</md-icon>
         </md-button>
@@ -36,7 +36,7 @@
     <!--CONTACTS-->
     <md-content>
         <md-list class="md-dense">
-            <md-list-item ng-repeat="contact in contacts" class="noright" ng-show="contact.status !== 0" ng-click="goToChat($event, $index, contact.status)">
+            <md-list-item ng-repeat="contact in user.contacts" class="noright" ng-show="contact.status !== 0" ng-click="goToChat($event, $index, contact.status)">
                 <!--USER INFO-->
                 <img ng-src="{{contact.profilePicture}}" class="md-avatar">
                 <p>{{contact.viewname}}</p>

@@ -1,18 +1,11 @@
 angular.module("chatApp")
 .factory("RESTapi", ["$http", "$location", "$q", function($http, $location, $q){
+
     let error = null;
-    let userId = null;
-    let username = null;
-    let userPicture = null;
-    let userEmail = null;
+
     let socket:SocketIOClient.Socket = null;
 
     return {
-        getError: function(){return error;},
-        getUser: function(){return userId;},
-        getUsername: function(){return username;},
-        getUserPicture: function(){return userPicture;},
-        getUserEmail: function(){return userEmail;},
 
         //USER LOGIN/SIGNUP
         checkLoggedIn: function(source = null){
@@ -20,17 +13,16 @@ angular.module("chatApp")
 
             $http.get('/loggedin').then(
                 (response)=>{
-                    error = null;
+                    this.error = null;
 
                     if(response.data !== '0'){
                         deferred.resolve();
-                        // user = response.data['_id'];
+                        this.ioEmit('join room', response.data._id);
+                        this.ioEmit('logged in', response.data);
 
                         if(source !== '/chat'){
                             $location.url('/chat');
                         }
-
-                        this.ioEmit('login');
                     }
                     else{
                         // error = 'You need to login.';
@@ -46,37 +38,27 @@ angular.module("chatApp")
 
         login: function(user){
             return $http.post('/login', user)
-                .then((response) => {
-                        userId = response.data['_id'];
-                        username = response.data['username'];
-                        userPicture = response.data['profilePicture'];
-                        userEmail = response.data['email'];
-                        this.ioEmit('join room', userId);
-                        $location.url('/chat');
-                        return response.data;
-                    },
-                    (reason)=>{
-                        error = 'User/Password Incorrect.';
-                        return error;
-                    }
-                );
+            .then((response) => {
+                    $location.url('/chat');
+                    return response.data;
+                },
+                (reason)=>{
+                    error = 'User/Password Incorrect.';
+                    return error;
+                }
+            );
         },
 
         signup: function(user){
             return $http.post('/signup', user)
                 .then((response)=>{
                     if(response.data){
-                        userId = response.data['_id'];
-                        username = response.data['username'];
-                        userPicture = response.data['profilePicture'];
-                        userEmail = response.data['email'];
-                        this.ioEmit('join room', userId);
                         $location.url('/chat');
                         return response.data;
                     }
                     else{
                         error = 'User already exists. Please log in.';
-                        return error;
+                        // return error;
                     }
                 });
         },
@@ -85,11 +67,12 @@ angular.module("chatApp")
             $http.post('/logout', null)
             .then(()=>{
                 error = null;
-                userId = null;
                 this.ioClose();
                 $location.url('/');
             });
         },
+
+
 
 
         //USER API
@@ -101,6 +84,26 @@ angular.module("chatApp")
                 },
                 (reject) => {}
             );
+        },
+
+        updateUserProfileInContact: function(data){
+            return $http.post('/updateUserProfileInContact', data)
+            .then(
+                (response) => {
+                    return response.data;
+                },
+                (reject) => {}
+            )
+        },
+
+        updateUserContactChat: function(data){
+            return $http.post('/updateUserContactChat', data)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                )
         },
 
         updateUserData: function(data){
@@ -125,6 +128,16 @@ angular.module("chatApp")
 
         deleteContact: function(data){
             return $http.delete('/deleteUserContact', data)
+            .then(
+                (response) => {
+                    return response.data;
+                },
+                (reject) => {}
+            )
+        },
+
+        deleteChat: function(data){
+            return $http.delete('/deleteUserChat', data)
             .then(
                 (response) => {
                     return response.data;
@@ -178,6 +191,26 @@ angular.module("chatApp")
                 );
         },
 
+        deleteChatRoom: function(data){
+            return $http.delete('/deleteChatRoom', data)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                )
+        },
+
+        updateChatRoom: function(data){
+            return $http.post('/updateChatRoom', data)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                )
+        },
+
 
 
         //SOCKET INTERFACE
@@ -201,7 +234,7 @@ angular.module("chatApp")
 
         ioClose: function(){
             socket.close();
-            socket = null;
+            this.ioConnect();
         }
     }
 }]);

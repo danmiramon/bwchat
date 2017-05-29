@@ -19,12 +19,12 @@
 
         <!--REMOVE CHATS-->
         <!--Remove button-->
-        <md-button ng-hide="remove" ng-click="removeToggle('chats', $event, true, false)" flex>
+        <md-button ng-hide="remove" ng-click="removeToggle('chats', $event, true)" flex>
             <md-tooltip md-direction="top" md-autohide="true">Remove Chat Rooms</md-tooltip>
             <md-icon class="material-icons md-24">remove_circle</md-icon>
         </md-button>
         <!--Remove done button-->
-        <md-button ng-show="remove" ng-click="removeToggle('chats', $event, false, true)" flex>
+        <md-button ng-show="remove" ng-click="removeToggle('chats', $event, false)" flex>
             <md-tooltip md-direction="top" md-autohide="true">Done</md-tooltip>
             <md-icon class="material-icons md-24">done</md-icon>
         </md-button>
@@ -35,7 +35,7 @@
     <!--CHATS-->
     <md-content>
         <md-list class="md-dense">
-            <md-list-item ng-repeat="chat in chats" class="noright" ng-class="{selectedChat: currentChat && currentChat._id === chat.chatId}" ng-click="loadChat(null, chat.chatId)">
+            <md-list-item ng-repeat="chat in user.chats" class="noright" ng-show="chat.status !== 0" ng-class="{selectedChat: currentChat && currentChat._id === chat.chatId}" ng-click="loadChat(null, chat.chatId)">
                 <!--CHAT INFO-->
                 <img ng-src="{{chat.chatPicture}}" class="md-avatar">
                 <p>{{chat.chatname}}</p>

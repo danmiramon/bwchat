@@ -22,7 +22,7 @@
         <div layout="row" layout-align="center center">
             <h1 flex="90">Black & White Chat</h1>
 
-            <button ng-click="logout()" ng-show="logged" flex="10">Logout</button>
+            <button ng-click="logout()" ng-show="!!user['_id']" flex="10">Logout</button>
         </div>
     </header>
 

@@ -2,6 +2,7 @@
 import * as express from "express";
 import * as mongoose from "mongoose";
 import {User} from "../models";
+import {userInfo} from "os";
 
 //LOGIN MANAGEMENT
 //User signup
@@ -68,7 +69,7 @@ export function insertUpdateContact(req:express.Request, res:express.Response){
     //Search if we have the contact in the contact list, if we do, update it, else, insert it
     User.findOneAndUpdate({'_id':req.body.id, 'contacts.contactId':req.body.contact.contactId},
         {$set: {'contacts.$': req.body.contact}},
-        //{new:true},
+        {new:true},
         function(err, contact){
             if(err){
                 throw(err);
@@ -83,11 +84,13 @@ export function insertUpdateContact(req:express.Request, res:express.Response){
                         if(err){
                             throw(err);
                         }
+                        res.json(inserted);
                     }
                 )
             }
-
-            res.json(contact);
+            else{
+                res.json(contact);
+            }
         });
 }
 
@@ -100,6 +103,19 @@ export function deleteUserContact(req:express.Request, res:express.Response){
             }
 
             res.json(user);
+        }
+    );
+}
+
+export function deleteUserChat(req:express.Request, res:express.Response){
+    User.findByIdAndUpdate(req.query.userId,
+        {$pull:{chats:{chatId:{$in:req.query.chats}}}},
+        function(err, chat){
+            if(err){
+                throw(err);
+            }
+
+            res.json(chat);
         }
     );
 }
@@ -125,5 +141,31 @@ export function insertUserChat(req:express.Request, res:express.Response){
             res.json(req.body);
         }
     );
+}
+
+//Used to update the current user in the contacts documents
+export function updateUserProfileInContact(req:express.Request, res:express.Response){
+    User.findOneAndUpdate({_id: req.body.id, contacts:{$elemMatch:{contactId:req.user._id}}},
+        {$set:{'contacts.$.profilePicture': req.body.profilePicture, 'contacts.$.username': req.body.username}},
+        {new: true},
+        function(err, user){
+            if(err){
+                throw(err);
+            }
+            res.json(user);
+        })
+}
+
+//Used to update the one-to-one chat
+export function updateUserContactChat(req:express.Request, res:express.Response){
+    User.findOneAndUpdate({_id: req.body.id, contacts:{$elemMatch:{contactId:req.user._id}}},
+        {$set:{'chats.$.chatPicture': req.body.profilePicture}},
+        {new: true},
+        function(err, user){
+            if(err){
+                throw(err);
+            }
+            res.json(user);
+        })
 }
 

@@ -62,15 +62,20 @@ app.get('/loggedin', routes.User.loggedin);
 
     //Data query routes
 app.get('/userData', routes.User.getData);
+app.post('/updateUserProfileInContact', routes.User.updateUserProfileInContact);
+app.post('/updateUserContactChat', routes.User.updateUserContactChat);
 app.post('/updateUserData', routes.User.updateData);
 app.post('/insertUpdateContact', routes.User.insertUpdateContact);
 app.delete('/deleteUserContact', routes.User.deleteUserContact);
+app.delete('/deleteUserChat', routes.User.deleteUserChat);
 app.get('/getUserContact', routes.User.getUserContact);
 app.post('/insertUserChat', routes.User.insertUserChat);
 
     //Chat room query routes
 app.post('/createChatRoom', routes.Chat.createChatRoom);
 app.get('/getChat', routes.Chat.getChat);
+app.delete('/deleteChatRoom', routes.Chat.deleteChatRoom);
+app.post('/updateChatRoom', routes.Chat.updateChatRoom);
 
     //Main Socket Routes
 routes.Socket.setIO(io);

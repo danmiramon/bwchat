@@ -2,6 +2,7 @@ import * as mongoose from "mongoose";
 
 //Chat interface
 export interface IChat extends mongoose.Document{
+    groupRoom: Boolean;
     contacts: mongoose.Schema.Types.ObjectId[];
 }
 
@@ -17,6 +18,7 @@ let message: mongoose.Schema = new mongoose.Schema({
 
 //Schemas
 let chatSchema: mongoose.Schema = new mongoose.Schema({
+    groupRoom: {type: Boolean},
     contacts: {type: [mongoose.Schema.Types.ObjectId]},
     messages:{type: [message]}
 });

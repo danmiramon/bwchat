@@ -6,7 +6,7 @@
 
     <div layout="row" layout-align="center center" layout-wrap ng-show="showPics">
         <div flex="auto" ng-repeat="img in profileImages">
-            <img ng-src="{{img}}" class="pictureList" ng-click="selectPic(this)">
+            <img ng-src="{{img}}" ng-class="{selectedPic: selectedPicture === $index}" class="pictureList" ng-click="selectPic($index)">
         </div>
     </div>
 

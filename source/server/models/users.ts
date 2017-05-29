@@ -35,6 +35,10 @@ let chat: mongoose.Schema = new mongoose.Schema({
     chatId: mongoose.Schema.Types.ObjectId, //This is also the chat room
     chatname:{type: String},
     chatPicture:{type: String},
+    status: {
+        type: Number,
+        default: 100 //100 - Active
+    }
 });
 
 
