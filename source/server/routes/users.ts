@@ -1,7 +1,7 @@
 //Import the users database
 import * as express from "express";
 import * as mongoose from "mongoose";
-import {User} from "../models";
+import {User, UserList} from "../models";
 import {userInfo} from "os";
 
 //LOGIN MANAGEMENT
@@ -13,12 +13,23 @@ export function signup(req:express.Request, res:express.Response, next:express.N
             return;
         }
         else{
+            //Create a user in the User Database
             let newUser = new User();
             newUser.username = req.body.username;
             newUser.email = req.body.email.toLowerCase();
             newUser.password = newUser.generateHash(req.body.password);
             newUser.save(function(err, user){
                 req.login(user, function(err){
+                    //On creation add it also to the User List
+                    let newListUser = new UserList();
+                    newListUser.userId = user._id;
+                    newListUser.username = req.body.username;
+                    newListUser.save(function(err, userList){
+                        if(err){
+                            return next(err);
+                        }
+                    });
+
                     if(err){
                         return next(err);
                     }
@@ -58,7 +69,18 @@ export function getData(req:express.Request, res:express.Response){
 }
 
 export function updateData(req:express.Request, res:express.Response){
+    //Update the user information
     User.findByIdAndUpdate(req.user._id, req.body, function(err, user){
+        //Also update its information in the User List
+        UserList.findOneAndUpdate({userId: req.user._id},
+            {username: req.body.username, profilePicture: req.body.profilePicture},
+        function(err, userList){
+            console.log(userList);
+            if(err){
+                throw(err);
+            }
+        });
+
         if(err){
             throw(err);
         }

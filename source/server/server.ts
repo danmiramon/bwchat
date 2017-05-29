@@ -60,7 +60,7 @@ app.post('/logout', routes.User.logout);
 app.post('/signup', routes.User.signup);
 app.get('/loggedin', routes.User.loggedin);
 
-    //Data query routes
+    //User query routes
 app.get('/userData', routes.User.getData);
 app.post('/updateUserProfileInContact', routes.User.updateUserProfileInContact);
 app.post('/updateUserContactChat', routes.User.updateUserContactChat);
@@ -70,6 +70,8 @@ app.delete('/deleteUserContact', routes.User.deleteUserContact);
 app.delete('/deleteUserChat', routes.User.deleteUserChat);
 app.get('/getUserContact', routes.User.getUserContact);
 app.post('/insertUserChat', routes.User.insertUserChat);
+
+    //User List query routes
 
     //Chat room query routes
 app.post('/createChatRoom', routes.Chat.createChatRoom);

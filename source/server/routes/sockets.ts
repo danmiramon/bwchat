@@ -23,9 +23,11 @@ export function setIO(sio){
             socket.join(data[0]);
         });
 
-        socket.on('join chat room', function(data){
+        socket.on('join chat room', function(data, fn){
+            console.log('Guest ' + data[1] + ' connected to room ' + data[0]);
             socket.join(data[0]);
-            io.to(data[1]).emit('open chat');
+            // io.broadcast.to(data[1]).emit('open chat');
+            fn();
         });
 
         //Leave a room

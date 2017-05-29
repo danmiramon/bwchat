@@ -291,7 +291,6 @@ angular.module('chatApp')
         $timeout(function(){
             let index = $scope.user.chats.findIndex(item => item.chatId === data[0]);
             $scope.user.chats[index].chatPicture = data[1];
-            console.log($scope.user.chats[index]);
         }, 0);
     });
 
@@ -650,7 +649,7 @@ angular.module('chatApp')
                         };
                         RESTapi.deleteChat(config)
                             .then(
-                                (response) => {console.log()},
+                                (response) => {},
                                 (reason) => {}
                             );
                         //Contact later
@@ -688,23 +687,6 @@ angular.module('chatApp')
 
 
 
-    // //Reload the cchats list
-    // RESTapi.ioOn('load chats', function(){
-    //     chatsLoad();
-    // });
-    //
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         //CHATS MENU
@@ -732,7 +714,10 @@ angular.module('chatApp')
                     $scope.currentChat = response;
                     let index = $scope.user.chats.findIndex(item => item.chatId === response._id);
                     if(index >= 0){
-                        RESTapi.ioEmit('join chat room', response._id, $scope.user._id);
+                        RESTapi.ioEmit('join chat room', response._id, $scope.user._id, function(){
+                            openChat();
+                            console.log($scope.chatView);
+                        });
                     }
                     else{
                         //If the chat is private and the users have been readded after a deletion, the chat information
@@ -809,7 +794,10 @@ angular.module('chatApp')
                     RESTapi.ioEmit('chat room added', response);
                     if(response.id === $scope.user._id){
                         //Join the newly created chat
-                        RESTapi.ioEmit('join chat room', response.chat.chatId, $scope.user._id);
+                        RESTapi.ioEmit('join chat room', response.chat.chatId, $scope.user._id, function(){
+                            openChat();
+                            console.log($scope.chatView);
+                        });
                     }
                 },
                 (reason) => {}
@@ -944,25 +932,23 @@ angular.module('chatApp')
         }
     };
 
-    // RESTapi.ioOn('remove contact', function(contact){
-    //     for(let i in $scope.contacts){
-    //         if($scope.contacts[i].contactId === contact){
-    //             $timeout(function(){
-    //                 $scope.contacts[i].status = 0;
-    //                 $scope.selectedContact[i] = false; //Clear the "checkbox" of the deleted item
-    //             }, 0);
-    //             break;
-    //         }
-    //     }
-    // });
+
 
 
 
 
         //CHAT ROOM WINDOW MANAGEMENT
     //TODO Open chat, final chat option, do it last
+    $scope.chatView = {
+        chatname: null
+    };
     let openChat = function(){
-        console.log($scope.currentChat);
+        //Get the chat position in the user's chat list
+        let chatIndex = $scope.user.chats.findIndex(item => item.chatId === $scope.currentChat._id);
+
+        //Set the chatname
+        $scope.chatView.chatname = $scope.user.chats[chatIndex].chatname;
+        console.log('here');
     };
 }])
 
