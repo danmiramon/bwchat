@@ -26,7 +26,6 @@ export function setIO(sio){
         socket.on('join chat room', function(data, fn){
             console.log('Guest ' + data[1] + ' connected to room ' + data[0]);
             socket.join(data[0]);
-            // io.broadcast.to(data[1]).emit('open chat');
             fn();
         });
 
@@ -85,8 +84,23 @@ export function setIO(sio){
         //     console.log('Removing chat room');
         //     io.to(data[0].room).emit('remove chat', data[0].contact);
         // });
+
+
+
+        //CHAT WINDOW
+        //Receive data from client 1, send to client 2 with socket.id to respond just to it
+        socket.on('who is connected', function(data){
+            socket.broadcast.to(data[0]).emit('send me your info', [data[1].userId, data[1]]);
+        });
+
+        //Receive data from client 2, send it back to client 1 through its socket.id (data[0])
+        socket.on('hello here is my data', function(data){
+            io.to(data[0]).emit('copying contact data', data[1]);
+        });
+
+        //Send a message to the users
+        socket.on('chat message', function(data){
+            socket.broadcast.to(data[0]).emit('receive message', data[1]);
+        });
     });
 }
-
-//To emit messages to a given room
-//io.to(room).emit('joined', 'connected to room');

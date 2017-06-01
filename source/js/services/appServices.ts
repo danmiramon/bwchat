@@ -211,6 +211,36 @@ angular.module("chatApp")
                 )
         },
 
+        insertMessage: function(data){
+            return $http.post('insertMessage', data)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reason) => {}
+                )
+        },
+
+        getChatLength: function(config){
+            return $http.get('/getChatLength', config)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                );
+        },
+
+        getChatMessages: function(config){
+            return $http.get('/getChatMessages', config)
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                );
+        },
+
 
 
         //SOCKET INTERFACE

@@ -59,3 +59,27 @@ body{
 .selectedPic, .selectedChat{
   border: 3px solid forestgreen;
 }
+
+
+
+
+
+
+ #vertical-container {
+  height: 400px;
+  width: 100%;
+   position:initial;
+   }
+
+ .repeated-item {
+  border-bottom: 1px solid #ddd;
+  box-sizing: border-box;
+  padding-top: 10px; }
+
+
+
+ md-virtual-repeat-container {
+  border: solid 1px grey; }
+
+ .md-virtual-repeat-container .md-virtual-repeat-offsetter div {
+  padding-left: 16px; }

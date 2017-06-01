@@ -89,3 +89,49 @@ export function updateChatRoom(req:express.Request, res:express.Response){
         }
     });
 }
+
+export function insertMessage(req:express.Request, res:express.Response){
+    req.body.message.date = new Date();
+    //Search for the correct chat room to insert the message
+    Chat.findByIdAndUpdate(req.body.id,
+        {$push: {messages: req.body.message}},
+        {upsert:true, new:true},
+        function(err,inserted){
+            if(err){
+                throw(err);
+            }
+            res.json(req.body.message);
+        });
+}
+
+export function getChatLength(req:express.Request, res:express.Response){
+    //Get the number of messages in the chat
+    Chat.findById(req.query.id, function(err, chat){
+        if(err){
+            throw(err);
+        }
+        res.json(chat['messages'].length);
+    });
+}
+
+export function getChatMessges(req:express.Request, res:express.Response){
+    //Get the number of messages in the chat
+    Chat.find({_id:req.query.id}, function(err, chat){
+        if(err){
+            throw(err);
+        }
+
+        let messages = chat[0]['messages'];
+        messages.sort(function(a,b){
+            return a.date - b.date;
+        });
+
+        let pn = parseInt(req.query.pageNumber),
+            size = parseInt(req.query.pageSize),
+            from = pn * size,
+            to = from + size;
+
+        res.json(messages.slice(from, to));
+
+    });
+}

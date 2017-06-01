@@ -75,7 +75,6 @@ export function updateData(req:express.Request, res:express.Response){
         UserList.findOneAndUpdate({userId: req.user._id},
             {username: req.body.username, profilePicture: req.body.profilePicture},
         function(err, userList){
-            console.log(userList);
             if(err){
                 throw(err);
             }

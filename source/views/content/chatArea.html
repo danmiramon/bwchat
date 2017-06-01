@@ -1,19 +1,62 @@
-<!--Chat name and contacts list area-->
-<md-toolbar>
-    <div class="md-toolbar-tools">
-        <h3>{{chatView.chatname}}</h3>
+<div layout="column">
+    <!--Chat name and contacts list area-->
+    <md-toolbar flex="15">
+        <div class="md-toolbar-tools">
+            <!--Chat name-->
+            <h3>{{chatView.chatname}}</h3>
+
+            <!--List of users-->
+            <md-list class="md-dense" layout="row">
+                <md-list-item ng-repeat="contact in chatView.contactList">
+                    <md-tooltip md-direction="top" md-autohide="true">{{contact.username}}</md-tooltip>
+                    <img ng-src="{{contact.profilePicture}}" class="md-avatar">
+                </md-list-item>
+            </md-list>
+
+            <span flex></span>
+
+            <!--Add/Remove users-->
+            <!--<md-button class="md-icon-button" ng-mouseenter="$mdMenu.open()">-->
+            <md-button class="md-icon-button" ng-show="currentChat">
+                <md-tooltip md-direction="top" md-autohide="true">Settings</md-tooltip>
+                <md-icon class="md-material">settings</md-icon>
+            </md-button>
+
+        </div>
+    </md-toolbar>
+
+
+
+
+
+    <!--Chat messages display area-->
+    <md-content layout="row" layout-align="center center" flex="70">
+        <md-virtual-repeat-container id="vertical-container" layout-align="end center" layout="column" flex>
+            <div md-virtual-repeat="item in infiniteItems" mdVRResize md-start-index="startIndex" class="repeated-item" md-on-demand flex>
+                <p>{{item.username}}</p>
+                <p>{{item.text}}</p>
+                <p>{{item.date}}</p>
+            </div>
+        </md-virtual-repeat-container>
+    </md-content>
+
+
+
+
+    <!--Chat message input area-->
+    <div layout="row" layout-align="center center" flex="15">
+        <!--Enters drawing mode-->
+        <md-button class="md-icon-button" flex="10">
+            <md-tooltip md-direction="top" md-autohide="true">Draw a message</md-tooltip>
+            <md-icon class="md-material md-36">palette</md-icon>
+        </md-button>
+
+        <!--Message input-->
+        <md-input-container md-no-float flex="70">
+            <textarea ng-model="$parent.messages" id="messageInput" name="messageInput" ng-keypress="keypressed($event)" ng-keydown="shiftDown($event)" ng-keyup="shiftUp($event)" aria-label="Messages" placeholder="Write a message..." md-no-resize rows="1" max-rows="3"></textarea>
+        </md-input-container>
+
+        <!--Send button-->
+        <md-button class="md-raised md-primary" ng-click="broadcastMessage($event)" flex="20">Send</md-button>
     </div>
-</md-toolbar>
-
-
-
-
-<!--Chat messages display area-->
-<md-content></md-content>
-
-
-
-
-<!--Chat message input area-->
-<div>Here goes the input data</div>
-
+</div>

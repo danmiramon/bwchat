@@ -78,6 +78,9 @@ app.post('/createChatRoom', routes.Chat.createChatRoom);
 app.get('/getChat', routes.Chat.getChat);
 app.delete('/deleteChatRoom', routes.Chat.deleteChatRoom);
 app.post('/updateChatRoom', routes.Chat.updateChatRoom);
+app.post('/insertMessage', routes.Chat.insertMessage);
+app.get('/getChatLength', routes.Chat.getChatLength);
+app.get('/getChatMessages', routes.Chat.getChatMessges);
 
     //Main Socket Routes
 routes.Socket.setIO(io);

@@ -15,7 +15,11 @@ angular.module('chatApp')
     RESTapi.ioConnect();
     RESTapi.ioOn('get login data', function(data){
         // $timeout(function(){
-            $scope.user = data;
+        $scope.user = data;
+        $scope.chatView = {
+            chatname: null,
+            contactList: []
+        };
             //$scope.loggedin = true;
         // },0);
     });
@@ -70,10 +74,11 @@ angular.module('chatApp')
     };
 }])
 
-.controller("menuCtrl", ["$scope", "$http", "$timeout", "orderByFilter", "$location", "$q", "$mdDialog", "$mdMenu", "RESTapi", function(
+.controller("menuCtrl", ["$scope", "$http", "$timeout", "$window", "orderByFilter", "$location", "$q", "$mdDialog", "$mdMenu", "RESTapi", function(
     $scope:angular.IScope,
     $http:angular.IHttpService,
     $timeout:angular.ITimeoutService,
+    $window:angular.IWindowService,
     orderBy:angular.IFilterOrderBy,
     $location:angular.ILocationService,
     $q:angular.IQService,
@@ -369,7 +374,7 @@ angular.module('chatApp')
                     //New Chat room is created, add the room information to each user
                     if(response){
                         //Set the new chat room as the current room
-                        if($scope.currentChat){
+                        if($scope.currentChat && $scope.currentChat._id !== response._id){
                             RESTapi.ioEmit('leave room', $scope.currentChat._id);
                         }
                         $scope.currentChat = response;
@@ -631,6 +636,7 @@ angular.module('chatApp')
                     {
                         $timeout(function(){
                             if($scope.currentChat && $scope.currentChat._id === response._id){
+                                RESTapi.ioEmit('leave room', $scope.currentChat._id);
                                 $scope.currentChat = null;
                             }
                             $scope.user.chats[index].status = 0;
@@ -676,6 +682,7 @@ angular.module('chatApp')
         if(index >= 0){
             $timeout(function(){
                 if($scope.currentChat && $scope.currentChat._id === chat){
+                    RESTapi.ioEmit('leave room', $scope.currentChat._id);
                     $scope.currentChat = null;
                 }
                 $scope.user.chats[index].status = 0;
@@ -692,6 +699,9 @@ angular.module('chatApp')
         //CHATS MENU
     $scope.currentChat = null;
     let setCurrentChat = function(currChat){
+        if($scope.currentChat && $scope.currentChat._id !== currChat._id){
+            RESTapi.ioEmit('leave room', $scope.currentChat._id);
+        }
         $scope.currentChat = currChat;
     };
 
@@ -708,7 +718,7 @@ angular.module('chatApp')
             .then(
                 (response) => {
                     //Set the found chat room as the current room
-                    if($scope.currentChat){
+                    if($scope.currentChat && $scope.currentChat._id !== response._id){
                         RESTapi.ioEmit('leave room', $scope.currentChat._id);
                     }
                     $scope.currentChat = response;
@@ -716,7 +726,6 @@ angular.module('chatApp')
                     if(index >= 0){
                         RESTapi.ioEmit('join chat room', response._id, $scope.user._id, function(){
                             openChat();
-                            console.log($scope.chatView);
                         });
                     }
                     else{
@@ -796,7 +805,6 @@ angular.module('chatApp')
                         //Join the newly created chat
                         RESTapi.ioEmit('join chat room', response.chat.chatId, $scope.user._id, function(){
                             openChat();
-                            console.log($scope.chatView);
                         });
                     }
                 },
@@ -938,17 +946,249 @@ angular.module('chatApp')
 
 
         //CHAT ROOM WINDOW MANAGEMENT
+    // $scope.listStyle = {
+    //     height: ($window.innerHeight - 112) + 'px';
+    // };
+    // $window.addEventListener('resize', onResize);
+    // function onResize() {
+    //     self.listStyle.height = ($window.innerHeight - 112) + 'px';
+    //     if(!$scope.$root.$$phase) $scope.$digest();
+    // }
+    //Infinite scroll class
+    //Infinite scroll class list class
+    class InfiniteScrollItems{
+        //Variables
+        private loadedPages:object;
+        private numItems:number;
+        private PAGE_SIZE:number;
+        private lastPage:number;
+
+        //RESTapi functions
+        private getChatLength:Function;
+        private getChatMessages:Function;
+
+        constructor(getChatLength: Function, getChatMessages: Function){
+            this.loadedPages = {};
+            this.numItems = 0;
+            this.PAGE_SIZE = 10;
+            this.lastPage = 0;
+
+            this.getChatLength = getChatLength;
+            this.getChatMessages = getChatMessages;
+
+            this.fetchNumItems();
+        }
+
+        public getItemAtIndex: (index:number) => Object = function(index:number):Object{
+            let pageNumber:number = Math.floor(index / this.PAGE_SIZE);
+            let page = this.loadedPages[pageNumber];
+
+            if(page){
+                return page[index % this.PAGE_SIZE];
+            }
+            else if(page !== null){
+                this.fetchPage(pageNumber);
+            }
+        };
+
+        public getLength: () => number = function(): number{
+            return this.numItems;
+        };
+
+        public insertNewMessage: (msg:Object) => void = function(msg:Object):void{
+            let page:number = Math.floor(this.numItems / this.PAGE_SIZE);
+            if(!this.loadedPages[page]){
+                this.loadedPages[page] = [];
+            }
+            $timeout(function(ii, page, msg){
+                ii.loadedPages[page].push(msg);
+                ii.numItems++;
+            }, 0, true, this, page, msg);
+        };
+
+        private fetchPage: (pageNumber:number) => void = function(pageNumber:number):void{
+            this.loadedPages[pageNumber] = null;
+            this.getChatMessages({params:{id:$scope.currentChat._id,
+                                     pageNumber: pageNumber,
+                                     pageSize: this.PAGE_SIZE}})
+            .then(
+                (response) => {
+                    this.loadedPages[pageNumber] = [];
+                    let messageUnit = {
+                        user: null,
+                        username: null,
+                        profilePicture: null,
+                        text: null,
+                        date: null,
+                    };
+                    for(let msg of response){
+                        messageUnit.user = msg.user;
+                        messageUnit.text = msg.text;
+                        messageUnit.date = msg.date;
+                        // if(msg.user !== $scope.user._id){
+                        //     let contact = $scope.chatView.contactList.find(item => item.userId === msg.user);
+                        //     msg.username = contact.username;
+                        //     msg.profilePicture = contact.profilePicture;
+                        // }
+                    }
+                    this.loadedPages[pageNumber].push(...response);
+                },
+                (reason) => {}
+            );
+
+        };
+
+        //Executed at the object creation
+        private fetchNumItems: ()=>void = function():void{
+            this.getChatLength({params:{id:$scope.currentChat._id}}).then(
+                (response) => {
+                    this.numItems = response;
+                    $scope.startIndex = response-1;
+                },
+                (reason) => {}
+            );
+        }
+    }
+
     //TODO Open chat, final chat option, do it last
     $scope.chatView = {
-        chatname: null
+        chatname: null,
+        contactList: []
     };
+    let shiftNotPressed:boolean = true; //Shift key pressed status, for multiline messages
+    //Get the Virtual Repeat Container Controller to execute the scrollTo method
+
+    //CHAT ENTER POINT
+    //Open and populate the chat view
     let openChat = function(){
         //Get the chat position in the user's chat list
         let chatIndex = $scope.user.chats.findIndex(item => item.chatId === $scope.currentChat._id);
 
         //Set the chatname
         $scope.chatView.chatname = $scope.user.chats[chatIndex].chatname;
-        console.log('here');
+
+        //Setup the current chat state
+        $scope.infiniteItems = new InfiniteScrollItems(RESTapi.getChatLength, RESTapi.getChatMessages);
+
+        //Send user information to all contacts connected
+        RESTapi.ioEmit('who is connected', $scope.currentChat._id, {
+            userId: $scope.user._id,
+            username: $scope.user.username,
+            profilePicture: $scope.user.profilePicture
+        });
+    };
+
+        //CONTACT DATA LOADING ON CONNECTION
+    //Receive data back from the contact
+    RESTapi.ioOn('copying contact data', function(data){
+        //Check if the user is already in the user list
+        let index = $scope.chatView.contactList.findIndex(item => item.userId === data.userId);
+        if(index < 0){
+            //If we have stablished a viewname for the user set it to be shown, else keep the username
+            let index = $scope.user.contacts.findIndex(item => item.contactId === data.userId);
+            if(index >= 0){
+                data.username = $scope.user.contacts[index].viewname;
+            }
+
+            //Push the user to the chat contacts array
+            $timeout(function(){
+                $scope.chatView.contactList.push(data);
+            },0);
+        }
+    });
+
+    //Receive data from a connected contact, send the user data back (data[0] is the contact socket.id)
+    RESTapi.ioOn('send me your info', function(data){
+        //Check if the user is already in the user list
+        let index = $scope.chatView.contactList.findIndex(item => item.userId === data[0].userId);
+        if(index < 0){
+            //If we have stablished a viewname for the user set it to be shown, else keep the username
+            let index = $scope.user.contacts.findIndex(item => item.contactId === data[1].userId);
+            if(index >= 0){
+                data[1].username = $scope.user.contacts[index].viewname;
+            }
+
+            //Push the user to the chat contacts array
+            $timeout(function(){
+                $scope.chatView.contactList.push(data[1]);
+            },0);
+        }
+
+        //Send your data back even if the user has already the data, maybe he lost it
+        RESTapi.ioEmit('hello here is my data', data[0], {
+            userId: $scope.user._id,
+            username: $scope.user.username,
+            profilePicture: $scope.user.profilePicture
+        });
+    });
+
+
+        //MESSAGE SEND/RECEIVE
+    //Message input send through key events
+    $scope.shiftDown = function(event){
+        if(event.keyCode === 16){
+            shiftNotPressed = false;
+        }
+    };
+    $scope.shiftUp = function(event){
+        if(event.keyCode === 16){
+            shiftNotPressed = true;
+        }
+    };
+
+    $scope.keypressed = function(event){
+        if(event.keyCode === 13 && shiftNotPressed && $scope.message !== ""){
+            $scope.broadcastMessage(event);
+        }
+    };
+
+    $scope.broadcastMessage = function(event){
+        let message = {
+            user: $scope.user._id,
+            text: $scope.messages,
+            date: null
+        };
+
+        //Write message on own chat space
+        // writeMessage(message);
+        //TODO Write to the server
+        RESTapi.insertMessage({
+            id: $scope.currentChat._id,
+            message: message
+        })
+        .then(
+            (response) => {
+                writeMessage(response);
+                //Broadcast the message
+                RESTapi.ioEmit('chat message', $scope.currentChat._id, response);
+            },
+            (reason) => {}
+        );
+
+        //Clear the message input and resize it to its original state
+        $scope.messages = null;
+        event.preventDefault();
+        $scope.$broadcast('md-resize-textarea');
+    };
+
+    //Receive a message from another user
+    RESTapi.ioOn('receive message', function(message){
+        writeMessage(message);
+    });
+
+
+
+
+
+    //Create a message and write it on the infinite scroll
+    let writeMessage = function(message){
+        //Search for the user visual information if not this user
+        if(message.user !== $scope.user._id){
+            let index = $scope.chatView.contactList.findIndex(item => item.userId === message.user);
+            message.username = $scope.chatView.contactList[index].username;
+            message.profilePicture = $scope.chatView.contactList[index].profilePicture;
+        }
+        $scope.infiniteItems.insertNewMessage(message);
     };
 }])
 
@@ -1198,7 +1438,7 @@ angular.module('chatApp')
                     //New Chat room is created, add the room information to each user
                     if(response){
                         //Set the new chat room as the current room
-                        if(currentChat){
+                        if(currentChat && currentChat._id !== response._id){
                             RESTapi.ioEmit('leave room', currentChat._id);
                         }
                         currentChat = response;

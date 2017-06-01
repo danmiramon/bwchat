@@ -6,13 +6,12 @@ export interface IChat extends mongoose.Document{
     contacts: mongoose.Schema.Types.ObjectId[];
 }
 
+
 //Sub Schemas
 let message: mongoose.Schema = new mongoose.Schema({
-    text:{type: String},
-    canvas:{type:String},
     user:{type:mongoose.Schema.Types.ObjectId},
+    text:{type: String},
     date:{type:Date},
-    active:{type: Boolean}
 });
 
 
