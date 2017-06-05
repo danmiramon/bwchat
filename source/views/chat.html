@@ -1,6 +1,6 @@
-<div layout="row" ng-controller="menuCtrl">
-    <nav flex="30">
-    <!--<nav flex="30">-->
+<div layout="row" layout-align="center none" flex="100" ng-controller="menuCtrl">
+    <span flex="10"></span>
+    <nav flex="20">
         <md-content class="md-padding">
             <md-tabs md-dynamic-height md-selected="selectedTab">
                 <md-tab ng-repeat="menu in menus" md-on-select="dataLoad(menu.tooltip)">
@@ -16,7 +16,8 @@
         </md-content>
     </nav>
 
-    <main flex="70">
-        <ng-include src="'views/content/chatArea.html'"></ng-include>
+    <main layout="row" flex="60">
+        <ng-include src="'views/content/chatArea.html'" layout="row" flex="100"></ng-include>
     </main>
+    <span flex="10"></span>
 </div>

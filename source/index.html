@@ -16,21 +16,29 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="./js/app.js"></script>
 </head>
-<body ng-controller="mainCtrl">
+<body ng-controller="mainCtrl" layout="column" layout-align="start none">
 
-    <header>
+    <header flex="10">
+
         <div layout="row" layout-align="center center">
-            <h1 flex="90">Black & White Chat</h1>
+            <span flex="25"></span>
 
-            <button ng-click="logout()" ng-show="!!user['_id']" flex="10">Logout</button>
+            <h1 flex="50">Black & White Chat</h1>
+
+            <span flex="25" layout="row" layout-align="center center" layout-margin id="toastLogout">
+                <md-button layout="row" layout-align="center center" class="md-raised md-primary" ng-click="showLogoutToast()" ng-show="!!user['_id']">
+                    <img ng-src="{{user.profilePicture}}" class="png-icon">
+                    <span>{{user.username}}</span>
+                </md-button>
+            </span>
         </div>
     </header>
 
-    <main>
-        <ng-view></ng-view>
+    <main  flex="85" layout="column" layout-align="start none">
+        <ng-view layout="column" layout-align="start none" flex="100"></ng-view>
     </main>
 
-    <footer></footer>
+    <footer flex="5"></footer>
 
 </body>
 </html>

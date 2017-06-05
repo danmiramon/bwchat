@@ -11,6 +11,7 @@ export interface IChat extends mongoose.Document{
 let message: mongoose.Schema = new mongoose.Schema({
     user:{type:mongoose.Schema.Types.ObjectId},
     text:{type: String},
+    image:{type: Boolean},
     date:{type:Date},
 });
 

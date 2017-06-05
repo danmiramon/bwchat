@@ -1,10 +1,11 @@
 angular.module('chatApp')
-.controller("mainCtrl", ["$scope", "$http", "$location", "$q", "$timeout", "RESTapi", function(
+.controller("mainCtrl", ["$scope", "$http", "$location", "$q", "$timeout", "$mdToast", "RESTapi", function(
     $scope:angular.IScope,
     $http:angular.IHttpService,
     $location:angular.ILocationService,
     $q:angular.IQService,
-    $timeout,
+    $timeout:angular.ITimeoutService,
+    $mdToast:angular.material.IToastService,
     RESTapi
 ){
     //GLOBAL VARIABLES
@@ -25,6 +26,11 @@ angular.module('chatApp')
     });
 
     //Log in
+    $scope.keyPressLogin = function(event,user){
+        if(event.keyCode === 13){
+            $scope.login(user);
+        }
+    };
     $scope.login = function(user:any){
         RESTapi.login(user)
         .then(
@@ -37,6 +43,11 @@ angular.module('chatApp')
     };
 
     //Sign up
+    $scope.keyPressSignup = function(event,user){
+        if(event.keyCode === 13){
+            $scope.signup(user);
+        }
+    };
     $scope.signup = function(user:any){
         if(!user || !user.email){
             $scope.error = 'Enter a valid email.';
@@ -68,9 +79,23 @@ angular.module('chatApp')
     //Logout
     $scope.logout = function(){
         $scope.user = null;
-        //$scope.loggedin = false;
         RESTapi.logout();
         $scope.error = null;
+    };
+    $scope.showLogoutToast = function(){
+        $mdToast.show({
+            position: 'top right',
+            template: '<md-toast class="mdCursor" layout="row" layout-align="center center" ng-click="logout()">' +
+                            '<span>' +
+                                '<md-icon class="md-material redIcons">power_settings_new</md-icon>' +
+                                '</span><span>Logout</span>' +
+                            '</span>' +
+                      '</md-toast>',
+            hideDelay: 1500,
+            parent: document.getElementById('toastLogout'),
+            preserveScope:true,
+            scope: $scope,
+        });
     };
 }])
 
@@ -86,11 +111,6 @@ angular.module('chatApp')
     $mdMenu,
     RESTapi,
 ){
-    //VARIABLES
-
-
-
-
     //MENUS
     //Menu tabs configuration
     $scope.menus = [
@@ -214,60 +234,6 @@ angular.module('chatApp')
     $scope.profileUpdate = function(){
         //If there are changes in the picture or username, update all the contacts and personal chat data
         if($scope.profile.profilePicture !== $scope.user.profilePicture || $scope.profile.username !== $scope.user.username){
-            for(let contact of $scope.user.contacts){
-                //Update contacts
-                let config =  {
-                    id: contact.contactId,
-                    profilePicture: $scope.profile.profilePicture,
-                    username: $scope.profile.username
-                };
-                RESTapi.updateUserProfileInContact(config)
-                .then(
-                    (response) => {
-                        //Finally emit a messaga to the contacts to update their views
-                        RESTapi.ioEmit('contact profile update',
-                            response._id,
-                            response.contacts[0].contactId,
-                            response.contacts[0].profilePicture,
-                            response.contacts[0].username);
-
-                        //Update one-to-one chat images if found
-                        let config = {
-                            params: {
-                                id: null,
-                                contacts: [response._id, response.contacts[0].contactId],
-                                privateChat: false
-                            }
-                        };
-                        RESTapi.getChat(config)
-                        .then(
-                            (responseChat) => {
-                                //If a chat is found, update it
-                                if(responseChat){
-                                    let config =  {
-                                        id: response._id,
-                                        profilePicture: response.contacts[0].profilePicture
-                                    };
-                                    RESTapi.updateUserContactChat(config)
-                                        .then(
-                                            (responseUserChat) => {
-                                                //Finally emit a messaga to the contacts to update their views
-                                                RESTapi.ioEmit('contact chat update',
-                                                    responseUserChat._id,
-                                                    responseUserChat.chats[0].chatId,
-                                                    responseUserChat.chats[0].chatPicture);
-                                            },
-                                            (reason) => {}
-                                        )
-                                }
-                            },
-                            (reason) => {}
-                        )
-                    },
-                    (reason) => {}
-                )
-            }
-
             //Update user view data and database fields
             $scope.user.firstname = $scope.profile.firstname;
             $scope.user.lastname = $scope.profile.lastname;
@@ -276,7 +242,38 @@ angular.module('chatApp')
             $scope.user.profilePicture = $scope.profile.profilePicture;
             RESTapi.updateUserData($scope.profile)
             .then(
-                (response) => {},
+                (response) => {
+                    for(let contact of $scope.user.contacts){
+                        //Emit a messaga to the contacts to update their views
+                        RESTapi.ioEmit('contact profile update',
+                            contact.contactId,
+                            $scope.user._id,
+                            $scope.user.profilePicture,
+                            $scope.user.username);
+
+                        //Emit a message to the contacts to update their views
+                        RESTapi.getChat({params:{
+                            id: null,
+                            contacts: [contact.contactId, $scope.user._id],
+                            privateChat: true
+                        }})
+                        .then(
+                            (response) => {
+                                if(response){
+                                    for(contact of response.contacts){
+                                        if(contact !== $scope.user._id){
+                                            RESTapi.ioEmit('contact chat update',
+                                                contact,
+                                                response._id,
+                                                $scope.user.profilePicture);
+                                        }
+                                    }
+                                }
+                            },
+                            (reason) => {}
+                        )
+                    }
+                },
                 (reason) => {
                     console.log('Error ' + reason);
                 }
@@ -480,6 +477,27 @@ angular.module('chatApp')
                                     .ok('Close')
                                     .targetEvent(event)
                                 );
+
+                                //Update the viewname in the chats view
+                                RESTapi.getChat({params:{
+                                    id: null,
+                                    contacts: [$scope.user.contacts[index].contactId, $scope.user._id],
+                                    privateChat: true
+                                }})
+                                .then(
+                                    (response) => {
+                                        if(response){
+                                            let index2 = $scope.user.chats.findIndex(item => item.chatId === response._id);
+                                            $scope.user.chats[index2].chatname = $scope.user.contacts[index].viewname;
+                                            RESTapi.updateUserContactChat({
+                                                chatId: response._id,
+                                                chatname: $scope.user.chats[index2].chatname
+                                            });
+
+                                        }
+                                    },
+                                    (reason) => {}
+                                )
                             },
                             (reason) => {}
                         )
@@ -730,7 +748,7 @@ angular.module('chatApp')
                     }
                     else{
                         //If the chat is private and the users have been readded after a deletion, the chat information
-                        //must be re-added as well on the first attemt of contact
+                        //must be re-added as well on the first attempt of contact
                         //Add to the contact
                         addToOneOnOneChat(participants, response._id);
                     }
@@ -799,13 +817,14 @@ angular.module('chatApp')
         RESTapi.insertUserChat(chatData)
             .then(
                 (response) => { //Response contains the chat information and each user contactId
-                    //Launch a message to all the users (including this) to update the view
-                    RESTapi.ioEmit('chat room added', response);
                     if(response.id === $scope.user._id){
                         //Join the newly created chat
-                        RESTapi.ioEmit('join chat room', response.chat.chatId, $scope.user._id, function(){
-                            openChat();
-                        });
+                        $scope.user.chats.push(response.chat);
+                        $scope.loadChat(null, response.chat.chatId, true);
+                    }
+                    else{
+                        //Launch a message to all the users to update the view
+                        RESTapi.ioEmit('chat room added', response);
                     }
                 },
                 (reason) => {}
@@ -946,14 +965,6 @@ angular.module('chatApp')
 
 
         //CHAT ROOM WINDOW MANAGEMENT
-    // $scope.listStyle = {
-    //     height: ($window.innerHeight - 112) + 'px';
-    // };
-    // $window.addEventListener('resize', onResize);
-    // function onResize() {
-    //     self.listStyle.height = ($window.innerHeight - 112) + 'px';
-    //     if(!$scope.$root.$$phase) $scope.$digest();
-    // }
     //Infinite scroll class
     //Infinite scroll class list class
     class InfiniteScrollItems{
@@ -962,6 +973,7 @@ angular.module('chatApp')
         private numItems:number;
         private PAGE_SIZE:number;
         private lastPage:number;
+        private scroll;
 
         //RESTapi functions
         private getChatLength:Function;
@@ -972,6 +984,8 @@ angular.module('chatApp')
             this.numItems = 0;
             this.PAGE_SIZE = 10;
             this.lastPage = 0;
+
+            this.scroll = document.getElementsByClassName('md-virtual-repeat-scroller')[0];
 
             this.getChatLength = getChatLength;
             this.getChatMessages = getChatMessages;
@@ -1003,6 +1017,9 @@ angular.module('chatApp')
             $timeout(function(ii, page, msg){
                 ii.loadedPages[page].push(msg);
                 ii.numItems++;
+                $timeout(function(iii){
+                    iii.scroll.scrollTop = iii.scroll.scrollHeight;
+                }, 0, true, ii);
             }, 0, true, this, page, msg);
         };
 
@@ -1032,6 +1049,8 @@ angular.module('chatApp')
                         // }
                     }
                     this.loadedPages[pageNumber].push(...response);
+                    // this.bottomScroll(this.scroll);
+                    this.scroll.scrollTop = this.scroll.scrollHeight;
                 },
                 (reason) => {}
             );
@@ -1047,16 +1066,46 @@ angular.module('chatApp')
                 },
                 (reason) => {}
             );
-        }
+        };
     }
 
-    //TODO Open chat, final chat option, do it last
     $scope.chatView = {
         chatname: null,
         contactList: []
     };
     let shiftNotPressed:boolean = true; //Shift key pressed status, for multiline messages
     //Get the Virtual Repeat Container Controller to execute the scrollTo method
+
+    //Canvas initialization and methods
+    let canvas = null;
+    let canvasContext: CanvasRenderingContext2D = null;
+    //Open/Close
+    $scope.canvasFlag = false;
+    $scope.openCanvas = function(){
+        $scope.canvasFlag = !$scope.canvasFlag;
+        canvas = document.getElementById('canvasMessage');
+        canvasContext = canvas.getContext('2d');
+        canvasContext.fillStyle = 'white';
+        canvasContext.fillRect(0,0,canvas.width,canvas.height);
+        canvasContext.fillStyle = 'black';
+
+    };
+    let drawing = false;
+    $scope.startDraw = function(event){
+        drawing = true;
+        $scope.draw(event);
+    };
+    $scope.draw = function(event){
+        if(drawing){
+            let canvasRect = canvas.getBoundingClientRect();
+            let x = event.clientX - canvasRect.left;
+            let y = event.clientY - canvasRect.top;
+            canvasContext.fillRect(x,y,2,2);
+        }
+    };
+    $scope.stopDraw = function(event){
+        drawing = false;
+    };
 
     //CHAT ENTER POINT
     //Open and populate the chat view
@@ -1123,6 +1172,49 @@ angular.module('chatApp')
     });
 
 
+        //CONTACT ADD/REMOVE
+    //TODO
+    $scope.addChatContact = function(event){
+        $mdDialog.show({
+            controller: 'ContactDialogController',
+            templateUrl: '../views/dialog/addUser.html',
+            parent: angular.element(document.body),
+            targetEvent: event,
+            locals: {
+                user: $scope.user
+            }
+        })
+            .then(
+                (response) => {
+
+                },
+                (reason) => {
+
+                }
+            )
+    };
+    //TODO
+    $scope.removeChatContact = function(event){
+        $mdDialog.show({
+            controller: 'ContactDialogController',
+            templateUrl: '../views/dialog/addUser.html',
+            parent: angular.element(document.body),
+            targetEvent: event,
+            locals: {
+                user: $scope.user
+            }
+        })
+            .then(
+                (response) => {
+
+                },
+                (reason) => {
+
+                }
+            )
+    };
+
+
         //MESSAGE SEND/RECEIVE
     //Message input send through key events
     $scope.shiftDown = function(event){
@@ -1145,9 +1237,18 @@ angular.module('chatApp')
     $scope.broadcastMessage = function(event){
         let message = {
             user: $scope.user._id,
-            text: $scope.messages,
+            text: null,
+            image: $scope.canvasFlag,
             date: null
         };
+
+        if($scope.canvasFlag){
+            message.text = $scope.png = canvas.toDataURL();
+            $scope.canvasFlag = false;
+        }
+        else{
+            message.text = $scope.messages;
+        }
 
         //Write message on own chat space
         // writeMessage(message);
@@ -1176,10 +1277,6 @@ angular.module('chatApp')
         writeMessage(message);
     });
 
-
-
-
-
     //Create a message and write it on the infinite scroll
     let writeMessage = function(message){
         //Search for the user visual information if not this user
@@ -1190,6 +1287,9 @@ angular.module('chatApp')
         }
         $scope.infiniteItems.insertNewMessage(message);
     };
+
+
+
 }])
 
 .controller("ContactDialogController",["$scope", "$q", "$mdDialog", "EMAIL_RE", "RESTapi", "user",

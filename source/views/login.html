@@ -1,10 +1,13 @@
-<div layout="row" layout-align="center center">
+<div layout="column" layout-align="start center" flex>
+    <div class="line-break"> </div>
+    <div class="line-break"> </div>
+    <div class="line-break"> </div>
     <md-content class="md-padding">
         <md-tabs md-dynamic-height>
             <!-- LOGIN FORM -->
             <md-tab label="Login">
                 <div class="customError" ng-show="error">{{error}}</div>
-                <md-content class="md-padding">
+                <md-content ng-keypress="keyPressLogin($event,user)"  class="md-padding">
                     <md-input-container class="md-block">
                         <label>Email</label>
                         <input type="text" name="email" ng-model="user.email" required>
@@ -28,7 +31,7 @@
             <!-- SIGNUP FORM -->
             <md-tab label="Signup">
                 <div class="customError" ng-show="error">{{error}}</div>
-                <md-content class="md-padding">
+                <md-content ng-keypress="keyPressSignup($event,user)" class="md-padding">
                     <md-input-container class="md-block">
                         <label>Email</label>
                         <input type="text" name="email" ng-model="user.email" required>

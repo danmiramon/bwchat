@@ -1,7 +1,7 @@
 //Import the users database
 import * as express from "express";
 import * as mongoose from "mongoose";
-import {User, UserList} from "../models";
+import {User, UserList, Chat} from "../models";
 import {userInfo} from "os";
 
 //LOGIN MANAGEMENT
@@ -71,7 +71,8 @@ export function getData(req:express.Request, res:express.Response){
 export function updateData(req:express.Request, res:express.Response){
     //Update the user information
     User.findByIdAndUpdate(req.user._id, req.body, function(err, user){
-        //Also update its information in the User List
+
+        //Update its information in the User List
         UserList.findOneAndUpdate({userId: req.user._id},
             {username: req.body.username, profilePicture: req.body.profilePicture},
         function(err, userList){
@@ -80,9 +81,35 @@ export function updateData(req:express.Request, res:express.Response){
             }
         });
 
+        //Update information in contact
+        User.update({contacts:{$elemMatch:{contactId: req.user._id}}},
+            {$set: {'contacts.$.username': req.body.username, 'contacts.$.profilePicture': req.body.profilePicture}},
+            {multi:true});
+
+        //Update the information in the chat list
+        Chat.find({contacts:req.user._id, groupRoom:false})
+            .select('contacts')
+            .exec(function(err, chats){
+                for(let chat of chats){
+                    for(let contact of chat.contacts){
+                        if(contact.toString() !== req.user._id.toString()){
+                            User.findOneAndUpdate({_id: contact, chats:{$elemMatch:{chatId: chat._id}}},
+                                {$set: {'chats.$.chatPicture': req.body.profilePicture}},
+                            function(err,change){
+                                if(err){
+                                    throw(err);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+
         if(err){
             throw(err);
         }
+
+        res.json(user);
     });
 }
 
@@ -179,8 +206,8 @@ export function updateUserProfileInContact(req:express.Request, res:express.Resp
 
 //Used to update the one-to-one chat
 export function updateUserContactChat(req:express.Request, res:express.Response){
-    User.findOneAndUpdate({_id: req.body.id, contacts:{$elemMatch:{contactId:req.user._id}}},
-        {$set:{'chats.$.chatPicture': req.body.profilePicture}},
+    User.findOneAndUpdate({_id: req.user._id, chats:{$elemMatch:{chatId:req.body.chatId}}},
+        {$set:{'chats.$.chatname': req.body.chatname}},
         {new: true},
         function(err, user){
             if(err){

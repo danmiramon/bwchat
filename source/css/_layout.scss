@@ -2,13 +2,49 @@
   border: 1px solid black;
 }*/
 
+.two{
+  background-color:green;
+}
+.three{
+  background-color:blue;
+}
+
 body{
-  width: 960px;
+  width: 100%;
+  height: 100%;
   margin: 0 auto;
 
   h1{
     text-align: center;
   }
+}
+
+.png-icon{
+  width: 24px;
+  height: 24px;
+  margin: 5px auto auto;
+  padding: 0;
+}
+
+.line-break{
+  width: 100%;
+  height: 15px;
+}
+
+.redIcons{
+  color: red !important;
+}
+
+.greenIcons{
+  color: green !important;
+}
+
+.mdRemoveMargin{
+  margin: 0 0;
+}
+
+md-pagination-wrapper{
+  margin: 0 auto;
 }
 
 .profilePic{
@@ -60,16 +96,29 @@ body{
   border: 3px solid forestgreen;
 }
 
-
-
-
-
-
- #vertical-container {
-  height: 400px;
+#vertical-container{
+  height: 100%;
   width: 100%;
-   position:initial;
-   }
+  position:initial;
+}
+
+#canvasMessage{
+  border: 2px solid darkslategrey;
+  position:absolute;
+  bottom:13.5%;
+  z-index: 2;
+  cursor: default;
+}
+
+
+
+
+
+
+
+
+
+
 
  .repeated-item {
   border-bottom: 1px solid #ddd;
