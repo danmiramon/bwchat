@@ -1031,25 +1031,23 @@ angular.module('chatApp')
             .then(
                 (response) => {
                     this.loadedPages[pageNumber] = [];
-                    let messageUnit = {
-                        user: null,
-                        username: null,
-                        profilePicture: null,
-                        text: null,
-                        date: null,
-                    };
                     for(let msg of response){
-                        messageUnit.user = msg.user;
-                        messageUnit.text = msg.text;
-                        messageUnit.date = msg.date;
-                        // if(msg.user !== $scope.user._id){
-                        //     let contact = $scope.chatView.contactList.find(item => item.userId === msg.user);
-                        //     msg.username = contact.username;
-                        //     msg.profilePicture = contact.profilePicture;
-                        // }
+                        let messageUnit = {
+                            user: msg.user,
+                            username: null,
+                            profilePicture: null,
+                            text: msg.text,
+                            image: msg.image,
+                            date: msg.date
+                        };
+                        //Get the user'a username and profile picture from the chat's contact list
+                        let index = $scope.chatView.chatContactList.findIndex(item => item.userId === msg.user);
+                        if(index >= 0){
+                            messageUnit.username = $scope.chatView.chatContactList[index].username;
+                            messageUnit.profilePicture = $scope.chatView.chatContactList[index].profilePicture;
+                        }
+                        this.loadedPages[pageNumber].push(messageUnit);
                     }
-                    this.loadedPages[pageNumber].push(...response);
-                    // this.bottomScroll(this.scroll);
                     this.scroll.scrollTop = this.scroll.scrollHeight;
                 },
                 (reason) => {}
@@ -1071,7 +1069,8 @@ angular.module('chatApp')
 
     $scope.chatView = {
         chatname: null,
-        contactList: []
+        chatContactList: [], //Contact list from the chat, used to get info for the messages
+        contactList: [] //List of currently connected contacts in the chat room, used in the toolbar area
     };
     let shiftNotPressed:boolean = true; //Shift key pressed status, for multiline messages
     //Get the Virtual Repeat Container Controller to execute the scrollTo method
@@ -1116,15 +1115,30 @@ angular.module('chatApp')
         //Set the chatname
         $scope.chatView.chatname = $scope.user.chats[chatIndex].chatname;
 
-        //Setup the current chat state
-        $scope.infiniteItems = new InfiniteScrollItems(RESTapi.getChatLength, RESTapi.getChatMessages);
+        //Get the chat's current contact list
+        RESTapi.getContactList({params: { contacts: $scope.currentChat.contacts}})
+        .then(
+            (response) => {
+                for(let i =0 ; i < response.length; i++){
+                    let index = $scope.user.contacts.findIndex(item => item.contactId === response[i].userId);
+                    if(index >= 0){
+                        response[i].username = $scope.user.contacts[index].viewname;
+                    }
+                }
+                $scope.chatView.chatContactList = response;
 
-        //Send user information to all contacts connected
-        RESTapi.ioEmit('who is connected', $scope.currentChat._id, {
-            userId: $scope.user._id,
-            username: $scope.user.username,
-            profilePicture: $scope.user.profilePicture
-        });
+                //Send user information to all contacts connected
+                RESTapi.ioEmit('who is connected', $scope.currentChat._id, {
+                    userId: $scope.user._id,
+                    username: $scope.user.username,
+                    profilePicture: $scope.user.profilePicture
+                });
+
+                //Setup the current chat state
+                $scope.infiniteItems = new InfiniteScrollItems(RESTapi.getChatLength, RESTapi.getChatMessages);
+            },
+            (reason) => {}
+        );
     };
 
         //CONTACT DATA LOADING ON CONNECTION
@@ -1237,6 +1251,8 @@ angular.module('chatApp')
     $scope.broadcastMessage = function(event){
         let message = {
             user: $scope.user._id,
+            username: $scope.user.username,
+            profilePicture: $scope.user.profilePicture,
             text: null,
             image: $scope.canvasFlag,
             date: null
@@ -1283,7 +1299,6 @@ angular.module('chatApp')
         if(message.user !== $scope.user._id){
             let index = $scope.chatView.contactList.findIndex(item => item.userId === message.user);
             message.username = $scope.chatView.contactList[index].username;
-            message.profilePicture = $scope.chatView.contactList[index].profilePicture;
         }
         $scope.infiniteItems.insertNewMessage(message);
     };

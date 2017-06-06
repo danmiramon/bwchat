@@ -81,6 +81,7 @@ app.post('/updateChatRoom', routes.Chat.updateChatRoom);
 app.post('/insertMessage', routes.Chat.insertMessage);
 app.get('/getChatLength', routes.Chat.getChatLength);
 app.get('/getChatMessages', routes.Chat.getChatMessges);
+app.get('/getContactList', routes.UserList.getContactList);
 
     //Main Socket Routes
 routes.Socket.setIO(io);

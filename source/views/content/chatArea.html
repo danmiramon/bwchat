@@ -1,7 +1,7 @@
 <div layout="column" flex="100">
     <!--Chat name and contacts list area-->
     <md-toolbar flex="15">
-        <div class="md-toolbar-tools">
+        <div class="md-toolbar-tools" layout="row">
             <!--Chat name-->
             <h3>{{chatView.chatname}}</h3>
 
@@ -46,15 +46,23 @@
     <md-content layout="column" layout-align="center center" flex="75">
         <md-virtual-repeat-container id="vertical-container" flex="100">
             <div md-virtual-repeat="item in infiniteItems" mdVRResize md-start-index="startIndex" class="repeated-item" md-on-demand flex>
-                <div ng-if="item.image">
-                    <p>{{item.username}}</p>
-                    <img ng-src="{{item.text}}">
-                    <p>{{item.date}}</p>
-                </div>
-                <div ng-if="!item.image">
-                    <p>{{item.username}}</p>
-                    <p>{{item.text}}</p>
-                    <p>{{item.date}}</p>
+                <div class="clear">
+                    <div ng-if="item.image" layout="row" layout-align="start center" ng-class="item.user === user._id ? 'from-me' : 'from-them'">
+                        <img ng-src="{{item.profilePicture}}" ng-hide="item.user === user._id" class="png-icon">
+                        <div>
+                            <p class="small-text" ng-hide="item.user === user._id">{{item.username}}</p>
+                            <img ng-src="{{item.text}}">
+                            <p class="small-text">{{item.date | date}}</p>
+                        </div>
+                    </div>
+                    <div ng-if="!item.image" layout="row" layout-align="start center" ng-class="item.user === user._id ? 'from-me' : 'from-them'">
+                        <img ng-src="{{item.profilePicture}}" ng-hide="item.user === user._id" class="png-icon">
+                        <div>
+                            <p class="small-text" ng-hide="item.user === user._id">{{item.username}}</p>
+                            <p class="chat-text">{{item.text}}</p>
+                            <p class="small-text">{{item.date | date}}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </md-virtual-repeat-container>
