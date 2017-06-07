@@ -1,0 +1,31 @@
+<md-dialog class="addToChatDialog" aria-label="Add To Chat Dialog">
+    <md-toolbar class="md-toolbar-slim">
+        <div class="md-toolbar-tools">
+            <h3>Add contacts to this chat room</h3>
+            <span flex></span>
+            <md-icon class="material-icons md-24 mdCursor" ng-click="cancel()">clear</md-icon>
+        </div>
+    </md-toolbar>
+
+
+    <md-dialog-content layout="column" layout-align="start center">
+        <p>Select Contacts:</p>
+        <div md-whiteframe="1">
+            <md-list class="md-dense" layout="row" layout-wrap>
+                <md-list-item ng-hide="contact.status < 300" class="noright" md-whiteframe="10" ng-repeat="contact in contacts" >
+                    <md-checkbox ng-checked="exists($index)" ng-click="toggle($index)" aria-label="Select contact"></md-checkbox>
+                    <img ng-src="{{contact.profilePicture}}" class="md-avatar">
+                    <p>{{contact.username}}</p>
+                </md-list-item>
+            </md-list>
+        </div>
+    </md-dialog-content>
+
+    <div flex></div>
+
+    <md-dialog-actions layout="row">
+        <span flex></span>
+        <md-button ng-click="validateNewChatContact($event)" ng-disabled="contactsSelected.length === 0">Add</md-button>
+        <md-button ng-click="cancel()">Cancel</md-button>
+    </md-dialog-actions>
+</md-dialog>

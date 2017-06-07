@@ -251,6 +251,16 @@ angular.module("chatApp")
                 );
         },
 
+        getAllContact: function(){
+            return $http.get('/getContactList')
+                .then(
+                    (response) => {
+                        return response.data;
+                    },
+                    (reject) => {}
+                );
+        },
+
 
 
         //SOCKET INTERFACE

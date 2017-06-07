@@ -79,12 +79,6 @@ export function setIO(sio){
             io.to(data[0].id).emit('added new chat room', data[0].chat);
         });
 
-        //Receive an alert of chat deletion, reply to the contacts to remove from list
-        // socket.on('chat deleted', function(data){
-        //     console.log('Removing chat room');
-        //     io.to(data[0].room).emit('remove chat', data[0].contact);
-        // });
-
 
 
         //CHAT WINDOW
@@ -102,5 +96,16 @@ export function setIO(sio){
         socket.on('chat message', function(data){
             socket.broadcast.to(data[0]).emit('receive message', data[1]);
         });
+
+        //Add contacts to an existing chat
+        socket.on('add contacts to chat', function(data){
+            io.to(data[0]).emit('new chat contact added', data[1]);
+        });
+
+        //Remove user from contact's current chat
+        socket.on('remove from current chat', function(data){
+            console.log(data);
+            io.to(data[0]).emit('remove user from current chat', data[1]);
+        })
     });
 }

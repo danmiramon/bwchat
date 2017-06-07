@@ -23,11 +23,11 @@
                 </md-button>
                 <md-menu-content width="2" ng-mouseleave="$mdMenu.close()">
                     <md-menu-item>
-                        <md-button class="md-fab md-raised md-mini" ng-click="acceptContactRequest($index)">
+                        <md-button class="md-fab md-raised md-mini" ng-click="addChatContact($event)">
                             <md-tooltip md-direction="top" md-autohide="true">Add Contact</md-tooltip>
                             <md-icon class="md-material greenIcons">person</md-icon>
                         </md-button>
-                        <md-button class="md-fab md-raised md-mini" ng-click="removeContact($event, $index)">
+                        <md-button class="md-fab md-raised md-mini" ng-click="removeChatContact($event)">
                             <md-tooltip md-direction="top" md-autohide="true">Remove Contact</md-tooltip>
                             <md-icon class="md-material redIcons">person</md-icon>
                         </md-button>

@@ -19,6 +19,8 @@ angular.module('chatApp')
         $scope.user = data;
         $scope.chatView = {
             chatname: null,
+            chatPicture: null,
+            chatContactList: [],
             contactList: []
         };
             //$scope.loggedin = true;
@@ -868,39 +870,72 @@ angular.module('chatApp')
 
                     //If the remove list have elements process them accordingly if they are one-to-one or group rooms
                     for(let chatRoom of removeList){
-                        let config = {
-                            params: {
-                                id: chatRoom,
-                                contacts: null,
-                                privateChat: false
-                            }
-                        };
-                        //Get the chat room information
-                        RESTapi.getChat(config)
-                        .then(
-                            (response) => {
-                                //Treat group rooms
-                                if(response.groupRoom){
-                                    //Remove the contact from the chat room
-                                    removeContactFromChatRoom(response);
-
-                                    //Remove just for this user
-                                    removeChatRoom(response._id, $scope.user._id);
-                                }
-                                //Treat One-To-One rooms
-                                else{
-                                    for(let i = 0; i < 2; i++){
-                                        //Remove from both ends
-                                        removeChatRoom(response._id, response.contacts[i]);
-                                    }
-                                }
-                            },
-                            (reason) => {}
-                        )
+                        removeUserFromChatRoom(chatRoom, $scope.user._id);
+                        // let config = {
+                        //     params: {
+                        //         id: chatRoom,
+                        //         contacts: null,
+                        //         privateChat: false
+                        //     }
+                        // };
+                        // //Get the chat room information
+                        // RESTapi.getChat(config)
+                        // .then(
+                        //     (response) => {
+                        //         //Treat group rooms
+                        //         if(response.groupRoom){
+                        //             //Remove the contact from the chat room
+                        //             removeContactFromChatRoom(response, $scope.user._id);
+                        //
+                        //             //Remove just for this user
+                        //             removeChatRoom(response._id, $scope.user._id);
+                        //         }
+                        //         //Treat One-To-One rooms
+                        //         else{
+                        //             for(let i = 0; i < 2; i++){
+                        //                 //Remove from both ends
+                        //                 removeChatRoom(response._id, response.contacts[i]);
+                        //             }
+                        //         }
+                        //     },
+                        //     (reason) => {}
+                        // )
                     }
                 },
                 (reason) => {}
             );
+    };
+
+    let removeUserFromChatRoom = function(chatRoom, userId){
+        let config = {
+            params: {
+                id: chatRoom,
+                contacts: null,
+                privateChat: false
+            }
+        };
+        //Get the chat room information
+        RESTapi.getChat(config)
+            .then(
+                (response) => {
+                    //Treat group rooms
+                    if(response.groupRoom){
+                        //Remove the contact from the chat room
+                        removeContactFromChatRoom(response, userId);
+
+                        //Remove just for this user
+                        removeChatRoom(response._id, userId);
+                    }
+                    //Treat One-To-One rooms
+                    else{
+                        for(let i = 0; i < 2; i++){
+                            //Remove from both ends
+                            removeChatRoom(response._id, response.contacts[i]);
+                        }
+                    }
+                },
+                (reason) => {}
+            )
     };
 
     let removeChatRoom = function(chatId, userId){
@@ -921,8 +956,7 @@ angular.module('chatApp')
             );
     };
 
-    let removeContactFromChatRoom = function(chatRoom){
-        //TODO test this by removing users one by one
+    let removeContactFromChatRoom = function(chatRoom, userId){
         //Check if the user is the last one to leave the chat room
         if(chatRoom.contacts.length === 1){
             let config = {
@@ -936,14 +970,10 @@ angular.module('chatApp')
                     (reason) => {}
                 )
         }
-        //TODO
-        //TODO
-        //TODO
-        //TODO Check this one if the chat contents gets deleted when removing users when this is working
         //If more users remain, just update the chat room without the user
         else{
             //Remove the user from the chat room participants
-            let index = chatRoom.contacts.findIndex(item => item === $scope.user._id);
+            let index = chatRoom.contacts.findIndex(item => item === userId);
             chatRoom.contacts.splice(index, 1);
 
             //Update the chat room
@@ -957,7 +987,17 @@ angular.module('chatApp')
                     (reason) => {}
                 )
         }
+
+        //Emit an alert to all users to remove this one from their current chats
+        RESTapi.ioEmit('remove from current chat', chatRoom._id, userId);
     };
+    RESTapi.ioOn('remove user from current chat', function(data){
+        //Remove contact information from current chat
+        let index = $scope.currentChat.contacts.findIndex(item => item === data);
+        $scope.currentChat.contacts.splice(index,1);
+        index = $scope.chatView.chatContactList.findIndex(item => item.userId === data);
+        $scope.chatView.chatContactList.splice(index,1);
+    });
 
 
 
@@ -1041,7 +1081,7 @@ angular.module('chatApp')
                             date: msg.date
                         };
                         //Get the user'a username and profile picture from the chat's contact list
-                        let index = $scope.chatView.chatContactList.findIndex(item => item.userId === msg.user);
+                        let index = $scope.chatView.chatContactList.findIndex(item => item.userId === msg.user); //TODO Get all the users list to fill this up
                         if(index >= 0){
                             messageUnit.username = $scope.chatView.chatContactList[index].username;
                             messageUnit.profilePicture = $scope.chatView.chatContactList[index].profilePicture;
@@ -1069,6 +1109,7 @@ angular.module('chatApp')
 
     $scope.chatView = {
         chatname: null,
+        chatPicture: null,
         chatContactList: [], //Contact list from the chat, used to get info for the messages
         contactList: [] //List of currently connected contacts in the chat room, used in the toolbar area
     };
@@ -1114,6 +1155,7 @@ angular.module('chatApp')
 
         //Set the chatname
         $scope.chatView.chatname = $scope.user.chats[chatIndex].chatname;
+        $scope.chatView.chatPicture = $scope.user.chats[chatIndex].chatPicture;
 
         //Get the chat's current contact list
         RESTapi.getContactList({params: { contacts: $scope.currentChat.contacts}})
@@ -1187,35 +1229,46 @@ angular.module('chatApp')
 
 
         //CONTACT ADD/REMOVE
-    //TODO
     $scope.addChatContact = function(event){
         $mdDialog.show({
-            controller: 'ContactDialogController',
-            templateUrl: '../views/dialog/addUser.html',
+            controller: 'ChatAddContactDialogController',
+            templateUrl: '../views/dialog/addChatUser.html',
             parent: angular.element(document.body),
             targetEvent: event,
             locals: {
-                user: $scope.user
+                currentChat: $scope.currentChat,
+                contactList: $scope.user.contacts,
+                chatView: $scope.chatView,
+                addChatToUsers: addChatToUsers
             }
         })
             .then(
-                (response) => {
-
-                },
-                (reason) => {
-
-                }
+                (response) => {},
+                (reason) => {}
             )
     };
-    //TODO
+    RESTapi.ioOn('new chat contact added', function(data){
+        for(let i = 0; i < data.length; i++){
+            $scope.currentChat.contacts.push(data[i].contactId);
+            $scope.chatView.chatContactList.push({
+                userId: data[i].contactId,
+                profilePicture:data[i].profilePicture,
+                username: data[i].viewname
+            })
+        }
+    });
+
     $scope.removeChatContact = function(event){
         $mdDialog.show({
-            controller: 'ContactDialogController',
-            templateUrl: '../views/dialog/addUser.html',
+            controller: 'ChatRemoveContactDialogController',
+            templateUrl: '../views/dialog/removeChatUser.html',
             parent: angular.element(document.body),
             targetEvent: event,
             locals: {
-                user: $scope.user
+                currentChat: $scope.currentChat,
+                chatView: $scope.chatView,
+                currentUser: $scope.user,
+                removeUserFromChatRoom: removeUserFromChatRoom
             }
         })
             .then(
@@ -1227,6 +1280,7 @@ angular.module('chatApp')
                 }
             )
     };
+
 
 
         //MESSAGE SEND/RECEIVE
@@ -1613,4 +1667,139 @@ angular.module('chatApp')
             $scope.hide();
         }
     }
+}])
+
+.controller("ChatAddContactDialogController",["$scope", "$q", "$mdDialog", "RESTapi", "currentChat", "contactList", "chatView", "addChatToUsers",
+function($scope,
+         $q,
+         $mdDialog,
+         RESTapi,
+         currentChat,
+         contactList,
+         chatView,
+         addChatToUsers
+){
+    $scope.contacts = [];
+    //Extract the list of the user's contacts not in the chat room contact list
+    for(let c of contactList){
+        let found = chatView.chatContactList.find(item => item.userId === c.contactId);
+        if(!found){
+            $scope.contacts.push(c);
+        }
+    }
+
+    //Checkbox control functions
+    $scope.contactsSelected = []; //Contains the contacts indexes
+    let contactIds = [];
+    $scope.toggle = function(index){
+        let i = $scope.contactsSelected.indexOf(index);
+        if(i > -1){
+            $scope.contactsSelected.splice(i, 1);
+            contactIds.splice(i, 1);
+        }
+        else{
+            $scope.contactsSelected.push(index);
+            contactIds.push($scope.contacts[index].contactId);
+        }
+    };
+    $scope.exists = function(index){
+        return $scope.contactsSelected.indexOf(index) > -1;
+    };
+
+    $scope.hide = function(){
+        $mdDialog.hide();
+    };
+    $scope.cancel = function(){
+        $mdDialog.cancel();
+    };
+    $scope.answer = function(answer){
+        $mdDialog.hide(answer);
+    };
+
+    //Validate the adding contacts list and add them to the corresponding user
+    $scope.validateNewChatContact = function(ev){
+        //Add the chat to the user's profile
+        for(let i = 0; i < contactIds.length; i++){
+            addChatToUsers({
+                id: contactIds[i],
+                chat: {
+                    chatId: currentChat._id,
+                    chatname: chatView.chatname,
+                    chatPicture: chatView.chatPicture
+                }
+            })
+        }
+
+        //Add the user to the chat room contact list
+        RESTapi.updateChatRoom({
+            id: currentChat._id,
+            data: currentChat
+        })
+            .then(
+                (response) => {
+                    //Notify the users to update their current chat state in case the new users connect
+                    RESTapi.ioEmit('add contacts to chat', currentChat._id, $scope.contacts);
+                },
+                (reason) => {}
+            );
+
+        $scope.hide();
+    };
+}])
+
+.controller("ChatRemoveContactDialogController",["$scope", "$q", "$mdDialog", "RESTapi", "currentChat", "chatView", "currentUser", "removeUserFromChatRoom",
+function($scope,
+         $q,
+         $mdDialog,
+         RESTapi,
+         currentChat,
+         chatView,
+         currentUser,
+         removeUserFromChatRoom
+){
+    $scope.contacts = chatView.chatContactList;
+
+    //Remove own user from the list
+    let index = $scope.contacts.findIndex(item => item.userId === currentUser._id);
+    if(index >= 0){
+        $scope.contacts.splice(index,1);
+    }
+
+    //Checkbox control functions
+    $scope.contactsSelected = []; //Contains the contacts indexes
+    let contactIds = [];
+    $scope.toggle = function(index){
+        let i = $scope.contactsSelected.indexOf(index);
+        if(i > -1){
+            $scope.contactsSelected.splice(i, 1);
+            contactIds.splice(i, 1);
+        }
+        else{
+            $scope.contactsSelected.push(index);
+            contactIds.push($scope.contacts[index].userId);
+        }
+    };
+    $scope.exists = function(index){
+        return $scope.contactsSelected.indexOf(index) > -1;
+    };
+
+    $scope.hide = function(){
+        $mdDialog.hide();
+    };
+    $scope.cancel = function(){
+        $mdDialog.cancel();
+    };
+    $scope.answer = function(answer){
+        $mdDialog.hide(answer);
+    };
+
+    //Validate the adding contacts list and add them to the corresponding user
+    $scope.validateChatRemoveContact = function(ev){
+        //Cycle through all removed users and remove from the chat
+        for(let i = 0; i < contactIds.length; i++){
+            removeUserFromChatRoom(currentChat._id, contactIds[i]);
+        }
+
+        $scope.hide();
+    };
 }]);

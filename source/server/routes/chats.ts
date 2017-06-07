@@ -87,6 +87,7 @@ export function updateChatRoom(req:express.Request, res:express.Response){
         if(err){
             throw(err);
         }
+        res.json(chat);
     });
 }
 

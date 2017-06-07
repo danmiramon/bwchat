@@ -11,3 +11,13 @@ export function getContactList(req:express.Request, res:express.Response){
         res.json(contacts);
     });
 }
+
+export function getAllContacts(req:express.Request, res:express.Response){
+    UserList.find({}, function(err, contacts){
+        if(err){
+            throw(err);
+        }
+
+        res.json(contacts);
+    });
+}
