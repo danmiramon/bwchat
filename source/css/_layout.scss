@@ -102,11 +102,14 @@ md-pagination-wrapper{
   position:initial;
 }
 
-#canvasMessage{
-  border: 2px solid darkslategrey;
+#canvasMessageContainer{
   position:absolute;
   bottom:13.5%;
   z-index: 2;
+}
+
+#canvasMessage{
+  border: 2px solid darkslategrey;
   cursor: default;
 }
 

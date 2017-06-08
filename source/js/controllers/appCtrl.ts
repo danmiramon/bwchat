@@ -1014,21 +1014,25 @@ angular.module('chatApp')
         private PAGE_SIZE:number;
         private lastPage:number;
         private scroll;
+        private contacts:object[];
 
         //RESTapi functions
         private getChatLength:Function;
         private getChatMessages:Function;
+        private getAllContacts:Function;
 
-        constructor(getChatLength: Function, getChatMessages: Function){
+        constructor(getChatLength: Function, getChatMessages: Function, getAllContacts: Function){
             this.loadedPages = {};
             this.numItems = 0;
             this.PAGE_SIZE = 10;
             this.lastPage = 0;
+            this.contacts = [];
 
             this.scroll = document.getElementsByClassName('md-virtual-repeat-scroller')[0];
 
             this.getChatLength = getChatLength;
             this.getChatMessages = getChatMessages;
+            this.getAllContacts = getAllContacts;
 
             this.fetchNumItems();
         }
@@ -1086,6 +1090,11 @@ angular.module('chatApp')
                             messageUnit.username = $scope.chatView.chatContactList[index].username;
                             messageUnit.profilePicture = $scope.chatView.chatContactList[index].profilePicture;
                         }
+                        else{
+                            index = this.contacts.findIndex(item => item.userId === msg.user); //TODO Get all the users list to fill this up
+                            messageUnit.username = this.contacts[index].username;
+                            messageUnit.profilePicture = this.contacts[index].profilePicture;
+                        }
                         this.loadedPages[pageNumber].push(messageUnit);
                     }
                     this.scroll.scrollTop = this.scroll.scrollHeight;
@@ -1097,10 +1106,20 @@ angular.module('chatApp')
 
         //Executed at the object creation
         private fetchNumItems: ()=>void = function():void{
-            this.getChatLength({params:{id:$scope.currentChat._id}}).then(
+            this.getChatLength({params:{id:$scope.currentChat._id}})
+            .then(
                 (response) => {
                     this.numItems = response;
                     $scope.startIndex = response-1;
+
+                    //Retrieve the contacts
+                    this.getAllContacts()
+                        .then(
+                            (response) => {
+                                this.contacts = response;
+                            },
+                            (response) => {}
+                        );
                 },
                 (reason) => {}
             );
@@ -1127,7 +1146,7 @@ angular.module('chatApp')
         canvasContext = canvas.getContext('2d');
         canvasContext.fillStyle = 'white';
         canvasContext.fillRect(0,0,canvas.width,canvas.height);
-        canvasContext.fillStyle = 'black';
+        canvasContext.fillStyle = "#000000";
 
     };
     let drawing = false;
@@ -1145,6 +1164,9 @@ angular.module('chatApp')
     };
     $scope.stopDraw = function(event){
         drawing = false;
+    };
+    $scope.setColor = function(color){
+        canvasContext.fillStyle = color;
     };
 
     //CHAT ENTER POINT
@@ -1177,7 +1199,7 @@ angular.module('chatApp')
                 });
 
                 //Setup the current chat state
-                $scope.infiniteItems = new InfiniteScrollItems(RESTapi.getChatLength, RESTapi.getChatMessages);
+                $scope.infiniteItems = new InfiniteScrollItems(RESTapi.getChatLength, RESTapi.getChatMessages, RESTapi.getAllContacts);
             },
             (reason) => {}
         );

@@ -251,8 +251,8 @@ angular.module("chatApp")
                 );
         },
 
-        getAllContact: function(){
-            return $http.get('/getContactList')
+        getAllContacts: function(){
+            return $http.get('/getAllContacts')
                 .then(
                     (response) => {
                         return response.data;

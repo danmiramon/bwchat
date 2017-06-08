@@ -85,7 +85,11 @@
         </md-input-container>
 
         <!--Drawing input-->
-        <canvas id="canvasMessage" ng-show="canvasFlag" ng-mousedown="startDraw($event)" ng-mousemove="draw($event)" ng-mouseup="stopDraw($event)" ng-mouseleave="stopDraw($event)"></canvas>
+        <div ng-show="canvasFlag" id="canvasMessageContainer">
+            <input id="canvasColor" type="color" ng-change="setColor(ccolor)" ng-model="ccolor">
+            <canvas id="canvasMessage" ng-mousedown="startDraw($event)" ng-mousemove="draw($event)" ng-mouseup="stopDraw($event)" ng-mouseleave="stopDraw($event)"></canvas>
+        </div>
+
 
         <!--Send button-->
         <md-button class="md-raised md-primary" ng-click="broadcastMessage($event)" flex="20"  ng-disabled="!currentChat">Send</md-button>
