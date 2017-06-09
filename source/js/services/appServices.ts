@@ -1,7 +1,11 @@
 angular.module("chatApp")
-.factory("RESTapi", ["$http", "$location", "$q", function($http, $location, $q){
+.factory("RESTapi", ["$http", "$location", "$q", function(
+    $http:angular.IHttpService,
+    $location:angular.ILocationService,
+    $q:angular.IQService
+){
 
-    let error = null;
+    let error:string = null;
 
     let socket:SocketIOClient.Socket = null;
 
@@ -17,7 +21,7 @@ angular.module("chatApp")
 
                     if(response.data !== '0'){
                         deferred.resolve();
-                        this.ioEmit('join room', response.data._id);
+                        this.ioEmit('join room', response.data['_id']);
                         this.ioEmit('logged in', response.data);
 
                         if(source !== '/chat'){

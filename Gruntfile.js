@@ -20,7 +20,7 @@ module.exports = function(grunt){
             options:{
                 fast: 'never',
                 module: 'amd',
-                target: 'es5',
+                target: 'es6',
                 sourceMap: false,
                 declaration: true,
                 //noImplicitAny: true
