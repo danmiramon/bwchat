@@ -106,6 +106,11 @@ export function setIO(sio){
         socket.on('remove from current chat', function(data){
             console.log(data);
             io.to(data[0]).emit('remove user from current chat', data[1]);
-        })
+        });
+
+        //Clear the chat view
+        socket.on('clear chat view', function(data){
+            io.to(data[0]).emit('clear chat area data');
+        });
     });
 }

@@ -10,6 +10,9 @@ angular.module("chatApp")
     let socket:SocketIOClient.Socket = null;
 
     return {
+        getError: function(){
+            return error;
+        },
 
         //USER LOGIN/SIGNUP
         checkLoggedIn: function(source = null){
@@ -17,7 +20,7 @@ angular.module("chatApp")
 
             $http.get('/loggedin').then(
                 (response)=>{
-                    this.error = null;
+                    error = null;
 
                     if(response.data !== '0'){
                         deferred.resolve();

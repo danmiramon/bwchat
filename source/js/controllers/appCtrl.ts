@@ -10,36 +10,47 @@ angular.module('chatApp')
 ){
     //GLOBAL VARIABLES
     $scope.error = null;
+    $scope.profile = {
+        profilePicture: null,
+        firstname: null,
+        lastname: null,
+        username: null,
+        language: null
+    };
 
     //Connect to the socket
     RESTapi.ioConnect();
     RESTapi.ioOn('get login data', function(data){
-        // $timeout(function(){
         $scope.user = data;
-        $scope.chatView = {
-            chatname: null,
-            chatPicture: null,
-            chatContactList: [],
-            contactList: []
-        };
-            //$scope.loggedin = true;
-        // },0);
+        $timeout(function(){
+            $scope.profile.profilePicture = $scope.user.profilePicture;
+            $scope.profile.firstname = $scope.user.firstname;
+            $scope.profile.lastname = $scope.user.lastname;
+            $scope.profile.username = $scope.user.username;
+            $scope.profile.language = $scope.user.language;
+        }, 0);
     });
 
     //Log in
     $scope.keyPressLogin = function(event:KeyboardEvent,user:app.IAppUser):void{
         if(event.keyCode === 13){
-            $scope.login(user);
+            $scope.login(user, true);
         }
     };
-    $scope.login = function(user:app.IAppUser):void{
+    $scope.login = function(user:app.IAppUser, errorFlag:boolean):void{
         RESTapi.login(user)
         .then(
             (response) => {
-                $scope.user = response;
+                if(typeof response === 'string' && errorFlag){
+                    $scope.error = response;
+                }
+                else{
+                    $scope.user = response;
+                }
                 // $scope.loggedin = true;
             },
-            (reason) => {}
+            (reason) => {
+            }
         );
     };
 
@@ -69,8 +80,12 @@ angular.module('chatApp')
 
         RESTapi.signup(user)
         .then((response) => {
-            $scope.user = response;
-            // $scope.loggedin = true;
+            if(typeof response === 'string'){
+                $scope.error = response;
+            }
+            else{
+                $scope.user = response;
+            }
         },
             (reason) => {
 
@@ -79,9 +94,10 @@ angular.module('chatApp')
 
     //Logout
     $scope.logout = function():void{
+        RESTapi.ioEmit('clear chat view', $scope.user._id);
         $scope.user = null;
-        RESTapi.logout();
         $scope.error = null;
+        RESTapi.logout();
     };
     $scope.showLogoutToast = function():void{
         $mdToast.show({
@@ -112,6 +128,17 @@ angular.module('chatApp')
     $mdMenu:angular.material.IMenuService,
     RESTapi,
 ){
+    RESTapi.ioOn('clear chat area data', function(){
+        $scope.chatView = {
+            chatname: null,
+            chatPicture: null,
+            chatContactList: [],
+            contactList: []
+        };
+        $scope.currentChat = null;
+        this.infiniteScrollItems.clearChat();
+    });
+
     //MENUS
     //Menu tabs configuration
     $scope.menus = [
@@ -1049,6 +1076,7 @@ angular.module('chatApp')
         $scope.currentChat.contacts.splice(index,1);
         index = $scope.chatView.chatContactList.findIndex(item => item.userId === data);
         $scope.chatView.chatContactList.splice(index,1);
+        RESTapi.ioEmit('clear chat view', $scope.currentChat.contacts[index]);
     });
 
 
@@ -1117,6 +1145,13 @@ angular.module('chatApp')
                     iii.scroll.scrollTop = iii.scroll.scrollHeight;
                 }, 0, true, ii);
             }, 0, true, this, page, msg);
+        };
+        public clearChat: () => void = function():void{
+            this.loadedPages = {};
+            this.numItems = 0;
+            this.PAGE_SIZE = 10;
+            this.lastPage = 0;
+            this.contacts = [];
         };
 
         private fetchPage: (pageNumber:number) => void = function(pageNumber:number):void{
