@@ -84,7 +84,11 @@ export function updateData(req:express.Request, res:express.Response){
         //Update information in contact
         User.update({contacts:{$elemMatch:{contactId: req.user._id}}},
             {$set: {'contacts.$.username': req.body.username, 'contacts.$.profilePicture': req.body.profilePicture}},
-            {multi:true});
+            {multi:true}, function(err, contacts){
+                if(err){
+                    throw(err);
+                }
+            });
 
         //Update the information in the chat list
         Chat.find({contacts:req.user._id, groupRoom:false})

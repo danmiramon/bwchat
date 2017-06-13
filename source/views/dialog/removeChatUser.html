@@ -12,7 +12,7 @@
         <p>Select Contacts:</p>
         <div md-whiteframe="1">
             <md-list class="md-dense" layout="row" layout-wrap>
-                <md-list-item class="noright" md-whiteframe="10" ng-repeat="contact in contacts" >
+                <md-list-item class="noright" md-whiteframe="10" ng-repeat="contact in removeContacts" >
                     <md-checkbox ng-checked="exists($index)" ng-click="toggle($index)" aria-label="Select contact"></md-checkbox>
                     <img ng-src="{{contact.profilePicture}}" class="md-avatar">
                     <p>{{contact.username}}</p>

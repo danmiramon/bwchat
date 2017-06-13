@@ -37,6 +37,7 @@ export function setIO(sio){
         //CONTACTS
         //Profile data updates
         socket.on('contact profile update', function(data){
+            console.log(data);
             io.to(data[0]).emit('update contact profile', [...data.splice(1, data.length)]);
         });
 
@@ -54,6 +55,7 @@ export function setIO(sio){
 
         //Receive an alert of contact deletion, reply to the contact to remove from list
         socket.on('contact deleted', function(data){
+            console.log(data);
             console.log('Deleting user: ' + data[1] + ' in user ' + data[0]);
             io.to(data[0]).emit('remove contact', data[1]);
         });
@@ -112,5 +114,10 @@ export function setIO(sio){
         socket.on('clear chat view', function(data){
             io.to(data[0]).emit('clear chat area data');
         });
+
+        //Remove contact from chat view
+        socket.on('remove from chat view', function(data){
+            socket.broadcast.to(data[0]).emit('remove contact from  chat view', data[1]);
+        })
     });
 }
