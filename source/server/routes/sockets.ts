@@ -14,7 +14,6 @@ export function setIO(sio){
 
         //FOR TESTING CHECK THE CONNECTED ROOMS
         socket.on('get rooms', function(){
-            console.log(socket.rooms);
             io.emit('roomies', socket.rooms);
         });
 
@@ -37,7 +36,6 @@ export function setIO(sio){
         //CONTACTS
         //Profile data updates
         socket.on('contact profile update', function(data){
-            console.log(data);
             io.to(data[0]).emit('update contact profile', [...data.splice(1, data.length)]);
         });
 
@@ -55,7 +53,6 @@ export function setIO(sio){
 
         //Receive an alert of contact deletion, reply to the contact to remove from list
         socket.on('contact deleted', function(data){
-            console.log(data);
             console.log('Deleting user: ' + data[1] + ' in user ' + data[0]);
             io.to(data[0]).emit('remove contact', data[1]);
         });
@@ -106,7 +103,6 @@ export function setIO(sio){
 
         //Remove user from contact's current chat
         socket.on('remove from current chat', function(data){
-            console.log(data);
             io.to(data[0]).emit('remove user from current chat', data[1]);
         });
 

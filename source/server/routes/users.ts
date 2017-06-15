@@ -1,8 +1,6 @@
 //Import the users database
 import * as express from "express";
-import * as mongoose from "mongoose";
 import {User, UserList, Chat} from "../models";
-import {userInfo} from "os";
 
 //LOGIN MANAGEMENT
 //User signup

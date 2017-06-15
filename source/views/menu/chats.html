@@ -1,31 +1,31 @@
 <md-content>
     <div layout="row" layout-align="center center">
         <md-input-container flex="60">
-            <label>Sort by</label>
+            <label translate>SORTBY</label>
             <md-select ng-model="chats.sortby" >
-                <md-option value="name" ng-click="sortBy('chats', 'chatname', false)">Name</md-option>
-                <md-option value="nameDesc" ng-click="sortBy('chats', 'chatname', true)">Name (desc)</md-option>
-                <md-option value="date" ng-click="sortBy('chats', 'creationDate', false)">Date</md-option>
-                <md-option value="dateDesc" ng-click="sortBy('chats', 'creationDate', true)">Date (desc)</md-option>
+                <md-option value="name" ng-click="sortBy('chats', 'chatname', false)"><span translate>SORTBY_NAME</span></md-option>
+                <md-option value="nameDesc" ng-click="sortBy('chats', 'chatname', true)"><span translate>SORTBY_NAME_DESC</span></md-option>
+                <md-option value="date" ng-click="sortBy('chats', 'creationDate', false)"><span translate>SORTBY_DATE</span></md-option>
+                <md-option value="dateDesc" ng-click="sortBy('chats', 'creationDate', true)"><span translate>SORTBY_DATE_DESC</span></md-option>
             </md-select>
         </md-input-container>
 
         <!--ADD CHAT-->
         <!--Add button-->
         <md-button ng-click="addChat($event)" flex>
-            <md-tooltip md-direction="top" md-autohide="true">Create Chat Room</md-tooltip>
+            <md-tooltip md-direction="top" md-autohide="true"><span translate>ADD_CHAT</span></md-tooltip>
             <md-icon class="material-icons md-24">forum</md-icon>
         </md-button>
 
         <!--REMOVE CHATS-->
         <!--Remove button-->
         <md-button ng-hide="remove" ng-click="removeToggle('chats', $event, true)" flex>
-            <md-tooltip md-direction="top" md-autohide="true">Remove Chat Rooms</md-tooltip>
+            <md-tooltip md-direction="top" md-autohide="true"><span translate>REMOVE_CHAT</span></md-tooltip>
             <md-icon class="material-icons md-24">remove_circle</md-icon>
         </md-button>
         <!--Remove done button-->
         <md-button ng-show="remove" ng-click="removeToggle('chats', $event, false)" flex>
-            <md-tooltip md-direction="top" md-autohide="true">Done</md-tooltip>
+            <md-tooltip md-direction="top" md-autohide="true"><span translate>DONE</span></md-tooltip>
             <md-icon class="material-icons md-24">done</md-icon>
         </md-button>
     </div>

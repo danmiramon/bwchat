@@ -3,9 +3,9 @@
     <nav flex="20">
         <md-content class="md-padding">
             <md-tabs md-dynamic-height md-selected="selectedTab">
-                <md-tab ng-repeat="menu in menus" md-on-select="dataLoad(menu.tooltip)">
+                <md-tab ng-repeat="menu in menus" md-on-select="dataLoad(menu.label)">
                     <md-tab-label>
-                        <md-tooltip md-direction="top" md-autohide="true">{{menu.tooltip}}</md-tooltip>
+                        <md-tooltip md-direction="top" md-autohide="true">{{menu.tooltip | translate}}</md-tooltip>
                         <md-icon class="material-icons md-36">{{menu.label}}</md-icon>
                     </md-tab-label>
                     <md-tab-body>

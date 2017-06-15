@@ -1,6 +1,6 @@
 <md-content layout="column" layout-align="start center">
     <md-button class="md-raised md-block" ng-click="showPics = !showPics" aria-label="Profile Pictures">
-        <md-tooltip md-direction="right" md-autohide="true">Select a Profile Picture</md-tooltip>
+        <md-tooltip md-direction="right" md-autohide="true"><span translate>SEL_PROF_PIC</span></md-tooltip>
         <img class="profilePic" ng-src="{{profile.profilePicture}}">
     </md-button>
 
@@ -12,22 +12,22 @@
 
     <div layout="column" layout-align="start start">
         <md-input-container class="mdRemoveMargin">
-            <label>First Name</label>
+            <label translate>FIRST_NAME</label>
             <input type="text" name="firstname" ng-model="profile.firstname">
         </md-input-container>
 
         <md-input-container class="mdRemoveMargin">
-            <label>Last Name</label>
+            <label translate>LAST_NAME</label>
             <input type="text" name="lastname" ng-model="profile.lastname">
         </md-input-container>
 
         <md-input-container class="mdRemoveMargin">
-            <label>Username</label>
+            <label translate>USERNAME</label>
             <input type="text" name="username" ng-model="profile.username">
         </md-input-container>
 
         <md-input-container class="mdRemoveMargin">
-            <label>Language</label>
+            <label translate>LANGUAGE</label>
             <md-select ng-model="profile.language" placeholder="profile.language">
                 <md-option value="en">English</md-option>
                 <md-option value="es">Español</md-option>
@@ -37,5 +37,5 @@
 
     <span flex></span>
 
-    <md-button ng-click="profileUpdate()" class="md-raised md-primary">Apply</md-button>
+    <md-button ng-click="profileUpdate()" class="md-raised md-primary"><span translate>BTN_APPLY</span></md-button>
 </md-content>

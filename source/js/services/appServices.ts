@@ -1,8 +1,10 @@
 angular.module("chatApp")
-.factory("RESTapi", ["$http", "$location", "$q", function(
+.factory("RESTapi", ["$http", "$location", "$q", "$translate", "moment", function(
     $http:angular.IHttpService,
     $location:angular.ILocationService,
-    $q:angular.IQService
+    $q:angular.IQService,
+    $translate:angular.translate.ITranslateService,
+    moment
 ){
 
     let error:string = null;
@@ -24,6 +26,8 @@ angular.module("chatApp")
 
                     if(response.data !== '0'){
                         deferred.resolve();
+                        $translate.use(response.data['language']);
+                        moment.locale(response.data['language']);
                         this.ioEmit('join room', response.data['_id']);
                         this.ioEmit('logged in', response.data);
 
@@ -71,7 +75,7 @@ angular.module("chatApp")
         },
 
         logout: function(){
-            $http.post('/logout', null)
+            return $http.post('/logout', null)
             .then(()=>{
                 error = null;
                 this.ioClose();

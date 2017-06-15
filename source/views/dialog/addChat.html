@@ -1,7 +1,7 @@
 <md-dialog class="addDialog" aria-label="Create Chat Dialog">
     <md-toolbar class="md-toolbar-slim">
         <div class="md-toolbar-tools">
-            <h3>Create Chat Room</h3>
+            <h3 translate>ADD_CHAT</h3>
             <span flex></span>
             <md-icon class="material-icons md-24 mdCursor" ng-click="cancel()">clear</md-icon>
         </div>
@@ -9,7 +9,7 @@
 
 
     <md-dialog-content layout="column" layout-align="start center">
-        <p>Select Contacts:</p>
+        <p translate>SELECT_CONTACTS</p>
         <div md-whiteframe="1">
             <md-list class="md-dense" layout="row" layout-wrap>
                 <md-list-item ng-hide="contact.status < 300" class="noright" md-whiteframe="10" ng-repeat="contact in contactList" >
@@ -23,7 +23,7 @@
         <div ng-show="isGroup()">
             <md-divider></md-divider>
 
-            <p>Select Chat Room Image:</p>
+            <p translate>CHAT_IMAGE</p>
             <div md-whiteframe="1">
                 <md-list class="md-dense" layout="row" layout-wrap layout-align="center center">
                     <md-list-item class="noright" md-whiteframe="10" ng-repeat="picture in groupPictures">
@@ -35,8 +35,8 @@
             <md-divider></md-divider>
 
             <md-input-container>
-                <label>Group Name:</label>
-                <input type="text" ng-model="groupName" placeholder="My Chat Group">
+                <label translate>GROUP_NAME</label>
+                <input type="text" ng-model="groupName" translate translate-attr-placeholder="GROUP_PLCHLD">
             </md-input-container>
         </div>
     </md-dialog-content>
@@ -45,7 +45,7 @@
 
     <md-dialog-actions layout="row">
         <span flex></span>
-        <md-button ng-click="validateNewChat($event)" ng-disabled="contactsSelected.length === 0">Create</md-button>
-        <md-button ng-click="cancel()">Cancel</md-button>
+        <md-button ng-click="validateNewChat($event)" ng-disabled="contactsSelected.length === 0"><span translate>CREATE</span></md-button>
+        <md-button ng-click="cancel()"><span translate>CANCEL</span></md-button>
     </md-dialog-actions>
 </md-dialog>

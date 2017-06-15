@@ -12,7 +12,6 @@ import * as session from "express-session";
 import * as routes from "./routes";
 import * as http from "http";
 import * as socketio from "socket.io";
-//import * as models from "./models";
 
 
 
@@ -70,8 +69,6 @@ app.delete('/deleteUserContact', routes.User.deleteUserContact);
 app.delete('/deleteUserChat', routes.User.deleteUserChat);
 app.get('/getUserContact', routes.User.getUserContact);
 app.post('/insertUserChat', routes.User.insertUserChat);
-
-    //User List query routes
 
     //Chat room query routes
 app.post('/createChatRoom', routes.Chat.createChatRoom);

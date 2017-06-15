@@ -1,20 +1,20 @@
 <md-dialog class="addDialog" aria-label="Add User Dialog">
     <md-toolbar class="md-toolbar-slim">
         <div class="md-toolbar-tools">
-            <p>Add Contacts</p>
+            <p translate>ADD_CONTACT</p>
             <span flex></span>
             <md-icon class="material-icons md-24 mdCursor" ng-click="cancel()">clear</md-icon>
         </div>
     </md-toolbar>
 
     <div>
-        <p md-title>Invite friends to chat with you</p>
+        <p md-title translate>INVITE_CONTACTS</p>
     </div>
 
     <md-dialog-content flex>
             <md-chips
                 ng-model="tags"
-                placeholder="Contact email"
+                placeholder="{{'CONTACT_EMAIL' | translate}}"
                 readonly="false"
                 md-removable="true"
             ></md-chips>
@@ -22,7 +22,7 @@
 
     <md-dialog-actions layout="row">
         <span flex></span>
-        <md-button ng-click="validateAddContacts($event)" ng-disabled="tags.length === 0">Add</md-button>
-        <md-button ng-click="cancel()">Cancel</md-button>
+        <md-button ng-click="validateAddContacts($event)" ng-disabled="tags.length === 0"><span translate>ADD</span></md-button>
+        <md-button ng-click="cancel()"><span translate>CANCEL</span></md-button>
     </md-dialog-actions>
 </md-dialog>

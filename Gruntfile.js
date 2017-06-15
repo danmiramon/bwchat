@@ -8,6 +8,7 @@ module.exports = function(grunt){
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-nodemon');
     grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
 
 
@@ -80,6 +81,22 @@ module.exports = function(grunt){
             }
         },
 
+        //COPY Images and Translation Files
+        copy:{
+            images:{
+                expand:true,
+                cwd:'source/',
+                src:'**/*.png',
+                dest:'public/'
+            },
+            translations:{
+                expand:true,
+                cwd:'source/',
+                src:'**/*.json',
+                dest:'public/'
+            }
+        },
+
 
 
         //PRODUCTION
@@ -123,6 +140,16 @@ module.exports = function(grunt){
                 files: 'source/**/*.html',
                 tasks: 'htmlmin'
             },
+
+            copyImages:{
+                files: 'source/**/*.png',
+                task: 'copy:images'
+            },
+
+            copyTrans:{
+                files: 'source/**/*.json',
+                task: 'copy:translations'
+            },
         },
 
         nodemon:{
@@ -147,7 +174,7 @@ module.exports = function(grunt){
 
     //Production task
     //grunt.registerTask('production', 'uglify');
-    grunt.registerTask('build', ['ts', 'sass', 'htmlmin']);
+    grunt.registerTask('build', ['ts', 'sass', 'htmlmin', 'copy']);
 
     //Default Task
     grunt.registerTask('default', ['build', 'concurrent']);

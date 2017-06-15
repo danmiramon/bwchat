@@ -18,17 +18,17 @@
             <!--Add/Remove users-->
             <md-menu ng-show="currentChat && currentChat.groupRoom">
                 <md-button class="md-fab md-raised md-mini" ng-mouseenter="$mdMenu.open()">
-                    <md-tooltip md-direction="top" md-autohide="true">Add/Remove</md-tooltip>
+                    <md-tooltip md-direction="top" md-autohide="true"><span translate>ADD_REMOVE</span></md-tooltip>
                     <md-icon class="md-material">settings</md-icon>
                 </md-button>
                 <md-menu-content width="2" ng-mouseleave="$mdMenu.close()">
                     <md-menu-item>
                         <md-button class="md-fab md-raised md-mini" ng-click="addChatContact($event)">
-                            <md-tooltip md-direction="top" md-autohide="true">Add Contact</md-tooltip>
+                            <md-tooltip md-direction="top" md-autohide="true"><span translate>ADD_CONTACT</span></md-tooltip>
                             <md-icon class="md-material greenIcons">person</md-icon>
                         </md-button>
                         <md-button class="md-fab md-raised md-mini" ng-click="removeChatContact($event)">
-                            <md-tooltip md-direction="top" md-autohide="true">Remove Contact</md-tooltip>
+                            <md-tooltip md-direction="top" md-autohide="true"><span translate>REMOVE_CONTACT</span></md-tooltip>
                             <md-icon class="md-material redIcons">person</md-icon>
                         </md-button>
                     </md-menu-item>
@@ -47,20 +47,13 @@
         <md-virtual-repeat-container id="vertical-container" flex="100">
             <div md-virtual-repeat="item in infiniteItems" mdVRResize md-start-index="startIndex" class="repeated-item" md-on-demand flex>
                 <div class="clear">
-                    <div ng-if="item.image" layout="row" layout-align="start center" ng-class="item.user === user._id ? 'from-me' : 'from-them'">
+                    <div layout="row" layout-align="start center" ng-class="item.user === user._id ? 'from-me' : 'from-them'">
                         <img ng-src="{{item.profilePicture}}" ng-hide="item.user === user._id" class="png-icon">
-                        <div>
+                        <div layout="column">
                             <p class="small-text" ng-hide="item.user === user._id">{{item.username}}</p>
-                            <img ng-src="{{item.text}}">
-                            <p class="small-text">{{item.date | date}}</p>
-                        </div>
-                    </div>
-                    <div ng-if="!item.image" layout="row" layout-align="start center" ng-class="item.user === user._id ? 'from-me' : 'from-them'">
-                        <img ng-src="{{item.profilePicture}}" ng-hide="item.user === user._id" class="png-icon">
-                        <div>
-                            <p class="small-text" ng-hide="item.user === user._id">{{item.username}}</p>
-                            <p class="chat-text">{{item.text}}</p>
-                            <p class="small-text">{{item.date | date}}</p>
+                            <pre class="chat-text" ng-if="!item.image">{{item.text}}</pre>
+                            <img ng-src="{{item.text}}" ng-if="item.image">
+                            <p class="small-text" am-time-ago="item.date"></p>
                         </div>
                     </div>
                 </div>
@@ -75,13 +68,14 @@
     <div layout="row" layout-align="center center" flex="10">
         <!--Enters drawing mode-->
         <md-button class="md-icon-button" flex="10" ng-click="openCanvas()"  ng-disabled="!currentChat">
-            <md-tooltip md-direction="top" md-autohide="true">Draw a message</md-tooltip>
+            <md-tooltip md-direction="top" md-autohide="true"><span translate>DRAW_MSG</span></md-tooltip>
             <md-icon class="md-material md-36">palette</md-icon>
         </md-button>
 
         <!--Message input-->
         <md-input-container md-no-float flex="70" class="mdRemoveMargin">
-            <textarea ng-model="$parent.messages" id="messageInput" class="mdRemoveMargin" name="messageInput" ng-keypress="keypressed($event)" ng-keydown="shiftDown($event)" ng-keyup="shiftUp($event)" ng-disabled="!currentChat || canvasFlag" aria-label="Messages" placeholder="Write a message..." md-no-resize rows="1" max-rows="3"></textarea>
+            <label translate>MSG_PLCHLD</label>
+            <textarea ng-model="$parent.messages" id="messageInput" class="mdRemoveMargin" name="messageInput" ng-keypress="keypressed($event)" ng-keydown="shiftDown($event)" ng-keyup="shiftUp($event)" ng-disabled="!currentChat || canvasFlag" aria-label="Messages" md-no-resize rows="1" max-rows="3"></textarea>
         </md-input-container>
 
         <!--Drawing input-->
@@ -92,6 +86,6 @@
 
 
         <!--Send button-->
-        <md-button class="md-raised md-primary" ng-click="broadcastMessage($event)" flex="20"  ng-disabled="!currentChat">Send</md-button>
+        <md-button class="md-raised md-primary" ng-click="broadcastMessage($event)" flex="20"  ng-disabled="!currentChat"><span translate>SEND</span></md-button>
     </div>
 </div>

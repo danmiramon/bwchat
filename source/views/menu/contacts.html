@@ -1,19 +1,19 @@
 <md-content>
     <div layout="row" layout-align="center center">
         <md-input-container flex="60">
-            <label>Sort by</label>
+            <label translate>SORTBY</label>
             <md-select ng-model="contacts.sortby" >
-                <md-option value="name" ng-click="sortBy('contacts', 'viewname', false)">Name</md-option>
-                <md-option value="nameDesc" ng-click="sortBy('contacts', 'viewname', true)">Name (desc)</md-option>
-                <md-option value="date" ng-click="sortBy('contacts', 'creationDate', false)">Date</md-option>
-                <md-option value="dateDesc" ng-click="sortBy('contacts', 'creationDate', true)">Date (desc)</md-option>
+                <md-option value="name" ng-click="sortBy('contacts', 'viewname', false)"><span translate>SORTBY_NAME</span></span></md-option>
+                <md-option value="nameDesc" ng-click="sortBy('contacts', 'viewname', true)"><span translate>SORTBY_NAME_DESC</span></md-option>
+                <md-option value="date" ng-click="sortBy('contacts', 'creationDate', false)"><span translate>SORTBY_DATE</span></md-option>
+                <md-option value="dateDesc" ng-click="sortBy('contacts', 'creationDate', true)"><span translate>SORTBY_DATE_DESC</span></md-option>
             </md-select>
         </md-input-container>
 
         <!--ADD CONTACT-->
         <!--Add button-->
         <md-button ng-click="addContact($event)" flex>
-            <md-tooltip md-direction="top" md-autohide="true">Add New Contacts</md-tooltip>
+            <md-tooltip md-direction="top" md-autohide="true"><span translate>ADD_CONTACT</span></md-tooltip>
             <md-icon class="material-icons md-24">person_add</md-icon>
         </md-button>
         <!--Add dialog box-->
@@ -21,12 +21,12 @@
         <!--REMOVE CONTACTS-->
         <!--Remove button-->
         <md-button ng-hide="remove" ng-click="removeToggle('contacts', $event, true)" flex>
-            <md-tooltip md-direction="top" md-autohide="true">Remove Contacts</md-tooltip>
+            <md-tooltip md-direction="top" md-autohide="true"><span translate>REMOVE_CONTACT</span></md-tooltip>
             <md-icon class="material-icons md-24">remove_circle</md-icon>
         </md-button>
         <!--Remove done button-->
         <md-button ng-show="remove" ng-click="removeToggle('contacts', $event, false)" flex>
-            <md-tooltip md-direction="top" md-autohide="true">Done</md-tooltip>
+            <md-tooltip md-direction="top" md-autohide="true"><span translate>DONE</span></md-tooltip>
             <md-icon class="material-icons md-24">done</md-icon>
         </md-button>
     </div>
@@ -58,11 +58,11 @@
                     <md-menu-content width="2" ng-mouseleave="$mdMenu.close()">
                         <md-menu-item>
                             <md-button class="md-fab md-raised md-mini" ng-click="acceptContactRequest($index)">
-                                <md-tooltip md-direction="top" md-autohide="true">Accept Request</md-tooltip>
+                                <md-tooltip md-direction="top" md-autohide="true"><span translate>ACCEPT_REQ</span></md-tooltip>
                                 <md-icon class="md-material greenIcons" md-menu-align-target>check</md-icon>
                             </md-button>
                             <md-button class="md-fab md-raised md-mini" ng-click="removeContact($event, $index)">
-                                <md-tooltip md-direction="top" md-autohide="true">Reject Request</md-tooltip>
+                                <md-tooltip md-direction="top" md-autohide="true"><span translate>REJECT_REQ</span></md-tooltip>
                                 <md-icon class="md-material redIcons" md-menu-align-target>clear</md-icon>
                             </md-button>
                         </md-menu-item>
