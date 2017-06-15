@@ -69,7 +69,7 @@ angular.module("chatApp")
                     }
                     else{
                         error = 'User already exists. Please log in.';
-                        // return error;
+                        return error;
                     }
                 });
         },

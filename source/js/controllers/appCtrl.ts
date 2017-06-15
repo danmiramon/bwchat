@@ -1,5 +1,5 @@
 angular.module('chatApp')
-.controller("mainCtrl", ["$scope", "$window", "$filter", "$http", "$location", "$q", "$timeout", "$mdToast", "RESTapi", function(
+.controller("mainCtrl", ["$scope", "$window", "$filter", "$http", "$location", "$q", "$timeout", "$mdToast", "EMAIL_RE", "RESTapi", function(
     $scope:app.IChatScope,
     $window:angular.IWindowService,
     $filter:angular.IFilterService,
@@ -8,6 +8,7 @@ angular.module('chatApp')
     $q:angular.IQService,
     $timeout:angular.ITimeoutService,
     $mdToast:angular.material.IToastService,
+    EMAIL_RE,
     RESTapi
 ){
 
@@ -64,6 +65,11 @@ angular.module('chatApp')
     };
     $scope.signup = function(user:app.IAppUser):void{
         if(!user || !user.email){
+            $scope.error = 'Enter a valid email.';
+            return;
+        }
+
+        if(!EMAIL_RE.test(user.email)){
             $scope.error = 'Enter a valid email.';
             return;
         }
